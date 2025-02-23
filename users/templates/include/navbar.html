@@ -1,0 +1,28 @@
+{% load static %}
+<nav class="navbar navbar-expand-sm navbar-dark bg-info">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="{% url 'accounts:profile' %}">{{request.user.username}}</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mynavbar">
+        <ul class="navbar-nav me-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'products:product_list' %}">Товары</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:cart' %}">Корзина</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="javascript:void(0)">Мои заказы</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:edit' %}">Изменить пароль</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'accounts:logout' %}">Выйти</a>
+          </li>
+        </ul>        
+      </div>
+    </div>
+  </nav> 

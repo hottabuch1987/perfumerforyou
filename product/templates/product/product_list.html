@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% block content %}
+<h2>Список товаров</h2>
+
+<ul>
+    {% for product in products %}
+        <li>{{ product.name }} - {{ product.price }} ₽ (Артикул: {{ product.article }})</li>
+    {% empty %}
+        <li>Нет доступных товаров.</li>
+    {% endfor %}
+</ul>
+
+<!-- Пагинация (если используете paginate_by) -->
+<div class="pagination">
+    <span class="step-links">
+        {% if products.has_previous %}
+            <a href="?page=1">&laquo; Первая</a>
+            <a href="?page={{ products.previous_page_number }}">Предыдущая</a>
+        {% endif %}
+
+        <span class="current">
+            Страница {{ products.number }} из {{ products.paginator.num_pages }}.
+        </span>
+
+        {% if products.has_next %}
+            <a href="?page={{ products.next_page_number }}">Следующая</a>
+            <a href="?page={{ products.paginator.num_pages }}">Последняя &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}

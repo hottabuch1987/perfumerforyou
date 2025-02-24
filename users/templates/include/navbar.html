@@ -10,14 +10,14 @@
                     <a class="nav-link" href="{% url 'products:list' %}"><i class="fas fa-box"></i> Товары</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'users:cart_detail' %}">
+                    <a class="nav-link" href="{% url 'cart:cart-view' %}">
                         <i class="fas fa-shopping-cart"></i> Корзина
                             <span id="lblCartCount">
                                 {% with cart_qty=cart|length%}
                                 {% if cart_qty > 0 %}
                                     {{cart_qty}}                
                                 {% endif %}
-
+                                    
                                 {% endwith %}
                             </span>
                     </a>

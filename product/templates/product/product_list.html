@@ -47,16 +47,9 @@
                             </select>
                         </td>
                         <td>
-                            <!-- <button type="button" class="btn btn-info btn-sm add-button" value="{{ product.id }}">
+                            <button type="button" class="btn btn-info btn-sm add-button" data-product-id="{{ product.id }}">
                                 Добавить в <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                            </button> -->
-                            <form class="add-to-cart-form" data-product-id="{{ product.id }}">
-                                {% csrf_token %}
-                                <input type="number" name="quantity" value="1" min="1" max="{{ product.quantity }}">
-                                <button type="submit" class="btn btn-info">
-                                    Добавить в корзину
-                                </button>
-                            </form>
+                            </button>
                         </td>
                     </tr>
                 {% empty %}
@@ -85,35 +78,36 @@
     {% endif %}
 </div>
 
-
-
-
-
-
-{% endblock %}
-
-{% block extra_scripts %}
 <script>
-$(document).ready(function(){
-    $('.add-to-cart-form').submit(function(e){
+    $(document).on('click', '.add-button', function (e) {
         e.preventDefault();
-        const form = $(this);
-        const productId = form.data('product-id');
-        const quantity = form.find('input[name="quantity"]').val();
+
+        const productId = $(this).data('product-id'); // Получаем ID продукта из data-атрибута
+        const productQty = $(this).closest('tr').find('select').val(); // Получаем выбранное количество из соответствующего select
         
-        $.post("{% url 'users:cart_add' %}", {
-            product_id: productId,
-            quantity: quantity,
-            csrfmiddlewaretoken: form.find('input[name="csrfmiddlewaretoken"]').val()
-        }, function(data){
-            if(data.success) {
-                $('#cart-count').text(data.qty);
-                $('#cart-total').text(data.total);
-            } else {
-                alert(data.error);
+        $.ajax({
+            type: 'POST',
+            url: '{% url "cart:add-to-cart" %}',
+            data: {
+                product_id: productId,
+                product_qty: productQty,
+                csrfmiddlewaretoken: '{{ csrf_token }}',
+                action: 'post'
+            },
+            success: function (response) {
+                document.getElementById('lblCartCount').textContent = response.qty;
+                const add_button = $(this);
+                
+                // Изменение текста и значка кнопки
+                add_button.prop('disabled', true);
+                add_button.html("Добавлено в <i class='fa fa-shopping-cart' aria-hidden='true'></i>"); // Изменяем HTML содержимое кнопки
+                add_button.removeClass("btn-info").addClass("btn-success");
+            }.bind(this), // связываем контекст с текущей кнопкой
+            error: function (error) {
+                console.log(error);
             }
         });
     });
-});
 </script>
+
 {% endblock %}

@@ -5,7 +5,6 @@ import uuid
 
 # Create your models here.
 class Product(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products', verbose_name='Поставщик')
     name = models.CharField("Название товара", max_length=100)
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)

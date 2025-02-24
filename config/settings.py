@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     "product.apps.ProductConfig",
     "orders.apps.OrdersConfig",
     "app_settings.apps.AppSettingsConfig",
+    "cart.apps.CartConfig",
     
 ]
 
@@ -78,7 +79,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 #custom
-                'users.context_processors.cart',
+                'cart.context_processors.cart',
             ],
         },
     },

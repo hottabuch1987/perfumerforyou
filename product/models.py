@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from supplier.models import Supplier
 import uuid
 
@@ -10,6 +11,8 @@ class Product(models.Model):
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
     article = models.CharField("Артикул", max_length=100)
     is_visible = models.BooleanField("Видимость товаров поставщика", default=True)
+    quantity = models.PositiveIntegerField("Количество товара", default=0)
+    updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     
     def __str__(self):
         return f"Потсавщик: {self.supplier.name}; Товар: {self.name}" if self.supplier else self.name

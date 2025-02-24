@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Ваша корзина</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Товар</th>
+                <th>Количество</th>
+                <th>Цена за единицу</th>
+                <th>Общая цена</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart %}
+                {% with product=item.product %}
+                <tr>
+                    <td>{{ product.name }}</td>
+                    <td>{{ item.qty }}</td>
+                    <td>{{ item.price }} ₽</td>
+                    <td>{{ item.total }} ₽</td>
+                    <td>
+                        <button class="btn btn-danger remove-from-cart" 
+                                data-product-id="{{ product.id }}">
+                            Удалить
+                        </button>
+                    </td>
+                </tr>
+                {% endwith %}
+            {% empty %}
+                <tr>
+                    <td colspan="5">Корзина пуста</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+        <tfoot>
+            <tr>
+                <td colspan="3">Всего:</td>
+                <td>{{ cart.get_total_price }} ₽</td>
+                <td></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+$(document).ready(function(){
+    $('.remove-from-cart').click(function(){
+        const productId = $(this).data('product-id');
+        $.post("{% url 'cart:cart_remove' %}", {
+            product_id: productId,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        }, function(data){
+            if(data.success) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

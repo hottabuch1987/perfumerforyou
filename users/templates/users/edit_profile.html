@@ -4,9 +4,10 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+{% if request.user.is_authenticated %}
 
 <div class="d-flex justify-content-center align-items-center vh-100">
-    <div class="container bg-white shadow-md p-4 form-layout" style="max-width: 400px; border: 1px solid rgba(108, 117, 125, 0.5);">
+    <div class="container bg-white shadow-md p-4 form-layout" style="max-width: 400px; border: 1px solid rgba(108, 117, 125, 0.5); margin: 20px;">
         <h3 class="text-center text-secondary">Изменить пароль</h3>
         <br>
 
@@ -15,7 +16,7 @@
             {{ form|crispy }}
 
             <div class="text-center text-secondary">      
-                <button type="submit" class="btn btn-success m-2 btn-register">Изменить пароль</button>
+                <button type="submit" class="btn btn-info m-2 btn-register">Изменить пароль</button>
             </div>
         </form>
 
@@ -30,5 +31,5 @@
         {% endfor %}
     </div>
 </div>
-
+{% endif %}
 {% endblock %}

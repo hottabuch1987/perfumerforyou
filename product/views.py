@@ -1,13 +1,34 @@
 from django.shortcuts import render
-from django.views.generic import ListView
 from .models import Product
+from .forms import SearchForm
 
-class ProductListView(ListView):
-    model = Product
-    template_name = 'product_list.html'  # Указываем шаблон для отображения
-    context_object_name = 'products'  # Имя переменной, доступной в шаблоне
-    paginate_by = 10  # Число товаров на странице (при необходимости)
 
-    def get_queryset(self):
-        # Возвращаем только видимые товары
-        return Product.objects.filter(is_visible=True)
+# def product_list(request):
+#     form = SearchForm()
+#     query = request.GET.get('q')
+#     products = Product.objects.all()
+
+#     if query:
+#         products = products.filter(name__icontains=query, is_visible=True)
+
+#     return render(request, 'product/product_list.html', {'form': form, 'products': products, 'query': query})
+
+
+def product_list(request):
+    form = SearchForm()
+    name_query = request.GET.get('name_query')
+    price_query = request.GET.get('price_query')
+    products = Product.objects.all()
+
+    if name_query:
+        products = products.filter(name__icontains=name_query, is_visible=True)
+
+    if price_query:
+        products = products.filter(price__icontains=price_query, is_visible=True)
+
+    return render(request, 'product/product_list.html', {
+        'form': form,
+        'products': products,
+        'name_query': name_query,
+        'price_query': price_query
+    })

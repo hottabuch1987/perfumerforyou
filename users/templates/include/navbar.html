@@ -1,28 +1,37 @@
-{% load static %}
 <nav class="navbar navbar-expand-sm navbar-dark bg-info">
     <div class="container-fluid">
-      <a class="navbar-brand" href="{% url 'accounts:profile' %}">{{request.user.username}}</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="mynavbar">
-        <ul class="navbar-nav me-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'products:product_list' %}">Товары</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:cart' %}">Корзина</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="javascript:void(0)">Мои заказы</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:edit' %}">Изменить пароль</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="{% url 'accounts:logout' %}">Выйти</a>
-          </li>
-        </ul>        
-      </div>
+        <a class="navbar-brand" href="{% url 'users:profile' %}">{{request.user.username}}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mynavbar">
+            <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'products:list' %}"><i class="fas fa-box"></i> Товары</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:cart_detail' %}">
+                        <i class="fas fa-shopping-cart"></i> Корзина
+                            <span id="lblCartCount">
+                                {% with cart_qty=cart|length%}
+                                {% if cart_qty > 0 %}
+                                    {{cart_qty}}                
+                                {% endif %}
+
+                                {% endwith %}
+                            </span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="javascript:void(0)"><i class="fas fa-receipt"></i> Мои заказы</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:edit' %}"><i class="fas fa-lock"></i> Изменить пароль</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
+                </li>
+            </ul>        
+        </div>
     </div>
-  </nav> 
+</nav>

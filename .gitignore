@@ -98,10 +98,8 @@ __pycache__/
 
 db.sqlite3
 dump.rdb
-static
 staticfiles
 media
-static
 debug.log
 
 .DS_Store

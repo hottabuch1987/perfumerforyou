@@ -5,79 +5,87 @@
 
 <div class="container mt-4">
     {% if products %}
-        <h2 class="text-secondary">Список товаров</h2>
-        <p class="text-secondary">Всего товаров: {{ products|length }}</p>
-
-        <form method="get" action="{% url 'products:list' %}" class="mb-3">
-            <div class="row g-3">
-                <div class="col-sm-12 col-md-4">
-                    <input type="text" name="name_query" value="{{ name_query|default:'' }}" placeholder="Поиск по имени" class="form-control" />
-                </div>
-                <div class="col-sm-12 col-md-4">
-                    <input type="text" name="price_query" value="{{ price_query|default:'' }}" placeholder="Поиск по цене" class="form-control" />
-                </div>
-                <div class="col-sm-12 col-md-4">
-                    <button type="submit" class="btn btn-info w-30">Поиск</button>
-                </div>
+    <div class="card border-info">
+        <div class="card-header bg-info text-white">
+            <h3 class="mb-0"><i class="fas fa-box"></i> Все товары</h3>
+        </div>
+                
+            <!--  -->
+        <div class="card-body">
+            <div class="table-responsive">
+                <p class="text-secondary">Всего товаров: {{ products|length }}</p>
+                <form method="get" action="{% url 'products:list' %}" class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-sm-12 col-md-4">
+                            <input type="text" name="name_query" value="{{ name_query|default:'' }}" placeholder="Поиск по имени" class="form-control m-2" />
+                        </div>
+                        <div class="col-sm-12 col-md-4">
+                            <input type="text" name="price_query" value="{{ price_query|default:'' }}" placeholder="Поиск по цене" class="form-control m-2" />
+                        </div>
+                        <div class="col-sm-12 col-md-4">
+                            <button type="submit" class="btn btn-info w-30 m-2">Поиск</button>
+                        </div>
+                    </div>
+                </form>
+                
+                <table class="table table-bordered table-hove text-secondary">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Цена</th>
+                            <th>Время обновления</th>
+                            <th>Количество</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.price }} ₽</td>
+                                <td>{{ product.updated_at }}</td>
+                                <td>
+                                    <select id="select{{ product.id }}" class="custom-select">
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-info btn-sm add-button" data-product-id="{{ product.id }}">
+                                        Добавить в <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">Нет доступных товаров.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+        {% else %}
+                <h2 class="text-secondary">Продукты не найдены.</h2>
+                <form method="get" action="{% url 'products:list' %}" class="mb-3">
+                    <div class="row g-3">
+                        <div class="col-sm-12 col-md-4">
+                            <input type="text" name="name_query" value="" placeholder="Поиск по имени" class="form-control" />
+                        </div>
+                        <div class="col-sm-12 col-md-4">
+                            <input type="text" name="price_query" value="" placeholder="Поиск по цене" class="form-control" />
+                        </div>
+                        <div class="col-sm-12 col-md-4">
+                            <button type="submit" class="btn btn-info w-30">Поиск</button>
+                        </div>
+                    </div>
+                </form>
+        {% endif %}
             </div>
-        </form>
-        
-        <table class="table table-bordered text-secondary">
-            <thead>
-                <tr>
-                    <th>Название</th>
-                    <th>Цена</th>
-                    <th>Время обновления</th>
-                    <th>Количество</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in products %}
-                    <tr>
-                        <td>{{ product.name }}</td>
-                        <td>{{ product.price }} ₽</td>
-                        <td>{{ product.updated_at }}</td>
-                        <td>
-                            <select id="select{{ product.id }}" class="custom-select">
-                                <option value="1">1</option>
-                                <option value="2">2</option>
-                                <option value="3">3</option>
-                                <option value="4">4</option>
-                            </select>
-                        </td>
-                        <td>
-                            <button type="button" class="btn btn-info btn-sm add-button" data-product-id="{{ product.id }}">
-                                Добавить в <i class="fa fa-shopping-cart" aria-hidden="true"></i>
-                            </button>
-                        </td>
-                    </tr>
-                {% empty %}
-                    <tr>
-                        <td colspan="5" class="text-center">Нет доступных товаров.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        
-    {% else %}
-        <h2 class="text-secondary">Продукты не найдены.</h2>
-        <form method="get" action="{% url 'products:list' %}" class="mb-3">
-            <div class="row g-3">
-                <div class="col-sm-12 col-md-4">
-                    <input type="text" name="name_query" value="" placeholder="Поиск по имени" class="form-control" />
-                </div>
-                <div class="col-sm-12 col-md-4">
-                    <input type="text" name="price_query" value="" placeholder="Поиск по цене" class="form-control" />
-                </div>
-                <div class="col-sm-12 col-md-4">
-                    <button type="submit" class="btn btn-info w-30">Поиск</button>
-                </div>
-            </div>
-        </form>
-    {% endif %}
+        </div>
+    </div>
 </div>
-
 <script>
     $(document).on('click', '.add-button', function (e) {
         e.preventDefault();

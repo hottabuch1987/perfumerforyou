@@ -14,4 +14,5 @@ from django.core.wsgi import get_wsgi_application
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 application = get_wsgi_application()
-ALLOWED_HOSTS = ['arik1987as.pythonanywhere.com']
+#ALLOWED_HOSTS = ['arik1987as.pythonanywhere.com']
+

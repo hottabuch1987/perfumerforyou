@@ -82,6 +82,7 @@ class Profile(models.Model):
     def __str__(self):
         return f'Профиль {self.user.username}'
     
+    
     class Meta:
         verbose_name = 'Профиль'
         verbose_name_plural = 'Профили'
@@ -89,6 +90,7 @@ class Profile(models.Model):
             models.Index(fields=['last_name'], name='flast_name_idx'),  # Индекс по полю last_name для поиска
             models.Index(fields=['phone_number'], name='phone_number_idx'),  # Индекс по полю phone_number для поиска
         ]
+        
     
 
 def generate_unique_username(base: str = "user", length: int = 12) -> str:

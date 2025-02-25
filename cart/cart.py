@@ -1,5 +1,5 @@
 from decimal import Decimal
-
+from django.conf import settings
 from product.models import Product
 
 
@@ -57,6 +57,13 @@ class Cart():
         if product_id in self.cart:
             self.cart[product_id]['qty'] = quantity
             self.session.modified = True
+
+    def clear(self):
+        self.cart.clear()
+        self.session.modified = True
+
+
+
 
     def get_total_price(self):
         return sum(Decimal(item['price']) * item['qty'] for item in self.cart.values())

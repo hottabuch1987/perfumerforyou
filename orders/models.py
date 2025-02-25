@@ -47,6 +47,13 @@ class Order(models.Model):
         current_date = timezone.now().strftime('%Y%m%d')  # Формат даты: YYYYMMDD
         random_suffix = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))  # Случайный суффикс
         return f'{current_date}-{random_suffix}'
+    
+    @property
+    def full_name(self):
+        return '{} {}'.format(self.user.last_name,
+                                 self.user.first_name,
+        )
+
 
     @property
     def get_total_price(self):

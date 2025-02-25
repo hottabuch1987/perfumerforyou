@@ -6,9 +6,11 @@ from django.urls import reverse_lazy
 from django.views.generic import UpdateView
 from django.contrib.auth.views import LoginView
 from product.models import Product
+from orders.models import Order
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.contrib import messages
 
 
 
@@ -23,6 +25,7 @@ class LoginUser(LoginView):
 
 
 def logout_user(request):
+    messages.success(request, f"Вы вышли из системы {request.user.profile}!")
     logout(request)
     return redirect('users:login')
 
@@ -32,8 +35,11 @@ class Profile(View):
     template_name = 'users/profile.html'
 
     def get(self, request):
+        
         user = request.user.profile  # Получаем профиль текущего пользователя
-        return render(request, self.template_name, {'user': user})
+        orders = Order.objects.filter(user=request.user.profile)
+        messages.success(request, f"Вы вошли в систему {request.user.profile}!")
+        return render(request, self.template_name, {'user': user, 'orders': orders})
 
 
 @method_decorator(login_required, name='dispatch')

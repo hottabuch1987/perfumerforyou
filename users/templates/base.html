@@ -29,8 +29,9 @@
 {% if request.user.is_authenticated %}
     {% include 'include/navbar.html' %}
 {% endif %}
-
+{% include 'include/messages.html' %}
 {% block content %}
+
 {% endblock content %}
 {% block extra_scripts %}
 {% endblock %}

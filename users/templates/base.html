@@ -25,11 +25,27 @@
 
 </head>
 <body>
-
+    {% if messages %}
+    {% for message in messages %}
+         <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+    {% endfor %}
+    {% endif %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(function(){
+        var messages = document.getElementsByClassName('alert');
+        for (var i = 0; i < messages.length; i++){
+            messages[i].style.display = 'none';
+        }
+        }, 3000);  // Delay in milliseconds (3 seconds)
+    
+        });
+    
+    </script>
 {% if request.user.is_authenticated %}
     {% include 'include/navbar.html' %}
 {% endif %}
-{% include 'include/messages.html' %}
+
 {% block content %}
 
 {% endblock content %}

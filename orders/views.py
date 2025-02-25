@@ -1,6 +1,6 @@
 # orders/views.py
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.shortcuts import render, redirect, get_object_or_404
 from django.db import transaction
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Order, OrderItem
@@ -34,11 +34,18 @@ def order_create(request):
         return redirect("product:product_list")
     
     if request.method == 'POST':
+        address_pvz = request.POST.get('address_pvz')
+        delivery = request.POST.get('delivery') 
+        if not address_pvz or not delivery:
+            messages.warning(request, "Пожалуйста, заполните все обязательные поля.")
+            return render(request, 'orders/create_order.html', {'cart': cart})
         try:
             with transaction.atomic():
                 order = Order.objects.create(
                     user=request.user.profile,
-                    status='pending'
+                    status='pending',
+                     address_pvz=address_pvz, 
+                    delivery=delivery
                 )
                 order.save()
                 

@@ -9,11 +9,20 @@ import string
 
 
 class Order(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     STATUS_CHOICES = (
         ('pending', 'Ожидает подтверждения'),
+        ('in_progress', 'В работе',),
         ('completed', 'Собран'),
+        ('delivered', 'Доставлен'),
+
     )
+    DELIVERY_WAY_CHOICES = [
+        ('SDEK', 'SDEK'),
+        ('Mail', 'Почта'),
+        ('Yandex', 'Яндекс'),
+        ('Boxberry', 'Боксберри'),
+    ]
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     user = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='orders', verbose_name='Пользователь')
     created = models.DateTimeField("Время заказа", auto_now_add=True)
     updated = models.DateTimeField("Время изменения заказа", auto_now=True)
@@ -29,6 +38,8 @@ class Order(models.Model):
         unique=True, 
         editable=False
     )
+    address_pvz = models.CharField("Адресс ПВЗ", max_length=150)
+    delivery = models.CharField("Способ доставки", choices=DELIVERY_WAY_CHOICES, default="SDEK", max_length=150)
 
     class Meta:
         ordering = ('-created',)

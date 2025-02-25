@@ -57,8 +57,6 @@ class Profile(models.Model):
             )
         ]
     )
-    address_pvz = models.CharField("Адресс ПВЗ", max_length=150, null=True, blank=True)
-    delivery = models.CharField("Способ доставки", choices=DELIVERY_WAY_CHOICES, default="SDEK", max_length=150, null=True, blank=True)
     markup_percentage = models.OneToOneField(
         GlobalSettings,
         on_delete=models.SET_NULL,

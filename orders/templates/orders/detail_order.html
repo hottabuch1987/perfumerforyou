@@ -13,6 +13,8 @@
         <div class="row mb-4">
           <div class="col-md-6">
             <p class="mb-1"><strong>Статус:</strong> {{ order.get_status_display }}</p>
+            <p class="mb-1"><strong>Адрес:</strong> {{order.address_pvz}}</p>
+            <p class="mb-1"><strong>Способ доставки:</strong> {{order.delivery}}</p>
             <p class="mb-1"><strong>Дата оформления:</strong> {{ order.created|date:"d.m.Y H:i" }}</p>
           </div>
           <div class="col-md-6 text-md-right">

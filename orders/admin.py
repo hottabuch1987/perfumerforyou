@@ -4,7 +4,7 @@ from .models import Order, OrderItem
 
 class OrderAdmin(admin.ModelAdmin):
     # Настройте отображаемые поля в списке
-    list_display = ('user', 'order_number', 'status')  
+    list_display = ('user', 'order_number', 'status', 'address_pvz', 'delivery')  
     list_filter = ('status',) 
 
     def get_queryset(self, request):

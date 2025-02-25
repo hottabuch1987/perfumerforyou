@@ -14,8 +14,6 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import UpdateView
 
 
-
-
 class LoginUser(LoginView):
     form_class = LoginUserForm
     template_name = 'users/login.html'

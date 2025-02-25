@@ -4,14 +4,14 @@ from .models import Product
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('supplier', 'name', 'price', 'article', 'is_visible', 'quantity', 'updated_at')
+    list_display = ('supplier', 'name',  'price', 'article', 'is_visible', 'quantity', 'updated_at')
     list_filter = ('article', 'name')
     search_fields = ('article', 'name', 'price')
     list_editable = ('is_visible',)
     
     fieldsets = (
         (None, {
-            'fields': ('supplier', 'name', 'price', 'article', 'is_visible'),
+            'fields': ('supplier', 'name',  'price', 'article', 'is_visible'),
         }),
     )
 
@@ -20,7 +20,7 @@ class ProductAdmin(admin.ModelAdmin):
         
     supplier_name.short_description = 'Название поставщика'  
 
-    list_display = ('supplier_name', 'name', 'price', 'article', 'is_visible')
+    list_display = ('supplier_name', 'name',  'price', 'article', 'is_visible')
 
 
 

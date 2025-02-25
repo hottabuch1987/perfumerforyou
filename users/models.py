@@ -4,7 +4,7 @@ import string
 from django.db import models
 from django.contrib.auth.models import User
 from app_settings.models import GlobalSettings
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, MinValueValidator, MaxValueValidator
 
 
 class Profile(models.Model):
@@ -57,13 +57,17 @@ class Profile(models.Model):
             )
         ]
     )
-    markup_percentage = models.OneToOneField(
-        GlobalSettings,
-        on_delete=models.SET_NULL,
+    
+    markup_percentage = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        verbose_name='Индивидуальный процент наценки',
         null=True,
         blank=True,
-        verbose_name='Процент наценки'
+        validators=[MinValueValidator(0), MaxValueValidator(100)]
     )
+    
     currency = models.CharField(
         max_length=3,
         choices=CURRENCY_CHOICES,

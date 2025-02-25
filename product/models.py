@@ -1,6 +1,7 @@
 from django.db import models
 from django.utils import timezone
 from supplier.models import Supplier
+from app_settings.models import GlobalSettings
 import uuid
 
 # Create your models here.

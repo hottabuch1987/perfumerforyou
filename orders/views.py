@@ -44,7 +44,7 @@ def order_create(request):
                 order = Order.objects.create(
                     user=request.user.profile,
                     status='pending',
-                     address_pvz=address_pvz, 
+                    address_pvz=address_pvz, 
                     delivery=delivery
                 )
                 order.save()

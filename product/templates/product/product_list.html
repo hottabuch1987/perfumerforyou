@@ -35,6 +35,7 @@
                             <th>Название</th>
                             <th>Цена</th>
                             <th>В наличии</th>
+                            <th>Артикул</th>
                             <th>Время обновления</th>
                             <th>Действия</th>
                         </tr>
@@ -45,6 +46,7 @@
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.display_final_price|floatformat:2 }} ₽</td>
                                 <td>{{ product.quantity }}</td>
+                                <td>{{ product.article}}</td>
                                 <td>{{ product.updated_at }}</td>
                                 
 

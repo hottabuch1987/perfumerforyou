@@ -9,7 +9,7 @@ class Product(models.Model):
     supplier = models.ForeignKey(Supplier, on_delete=models.CASCADE, related_name='products', verbose_name='Поставщик')
     name = models.CharField("Название товара", max_length=100)
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
-    article = models.CharField("Артикул", max_length=100)
+    article = models.CharField("Aртикул", max_length=100)
     is_visible = models.BooleanField("Видимость товаров поставщика", default=True)
     quantity = models.PositiveIntegerField("Количество товара", default=0)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)

@@ -1,19 +1,1 @@
 
-.custom-select {
-    width: 100px; /* Задайте желаемую ширину */
-    padding: 10px; /* Добавить отступ внутри элемента */
-    border: 2px solid #007BFF; /* Цвет рамки */
-    border-radius: 5px; /* Закругленные углы */
-    background-color: #f8f9fa; /* Цвет фона */
-    font-size: 16px; /* Размер шрифта */
-    transition: border-color 0.3s ease; /* Плавный переход цвета границы */
-}
-
-.custom-select:hover {
-    border-color: #0056b3; /* Изменение цвета границы при наведении */
-}
-
-.custom-select:focus {
-    outline: none; /* Убираем стандартный контур при фокусе */
-    border-color: #0056b3; /* Изменяем цвет границы при фокусе */
-}

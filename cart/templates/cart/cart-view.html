@@ -20,7 +20,7 @@
               <th>Продукт</th>
               <th>В наличии</th>
               <th>Количество</th>
-              <th>Действия</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -30,27 +30,23 @@
               <td>{{ product.name }}</td>
               <td>{{ product.quantity }}</td>
               <td>
-                <select id="select{{ product.id }}" class="custom-select">
-                  {% with max_qty=product.quantity|add:0 %}
-                  {% for i in "1234"|make_list %}
-                    {% with qty=i|add:"0" %}
-                    {% if qty <= max_qty and qty >= 1 %}
-                      <option value="{{ qty }}" {% if item.qty == qty %}selected{% endif %}>
-                        {{ qty }}
-                      </option>
-                    {% endif %}
-                    {% endwith %}
-                  {% endfor %}
-                  {% endwith %}
-                </select>
+                <select 
+                    id="select{{ product.id }}" 
+                    class="custom-select"
+                    data-default-size="1"
+                    size="1"
+                >
+                      {% with max_qty=product.quantity %}
+                          {% for i in ""|ljust:max_qty %}
+                              <option value="{{ forloop.counter }}" {% if item.qty == forloop.counter %}selected{% endif %}>
+                                  {{ forloop.counter }}
+                              </option>
+                          {% endfor %}
+                      {% endwith %}
+                  </select>
               </td>
+              
               <td>
-                <button type="button" data-index="{{ product.id }}" 
-                        class="btn btn-primary btn-sm update-button" 
-                        title="Обновить"
-                        {% if product.quantity < 1 %}disabled{% endif %}>
-                  <i class="fa fa-edit" aria-hidden="true"></i>
-                </button>
                 <button type="button" class="btn btn-danger btn-sm delete-button" 
                         data-index="{{ product.id }}" title="Удалить">
                   <i class="fa fa-trash" aria-hidden="true"></i>
@@ -75,67 +71,71 @@
 </div>
 
 <script>
-  $(document).on('click', '.delete-button', function(e) {
-    e.preventDefault();
-    const $button = $(this);
-    
-    $.ajax({
-      type: 'POST',
-      url: '{% url "cart:delete-to-cart" %}',
-      data: {
-        product_id: $button.data('index'),
-        csrfmiddlewaretoken: '{{ csrf_token }}',
-        action: 'post'
-      },
-      success: function(response) {
-        $('#lblCartCount').text(response.qty);
-        $('#total').text(response.total + ' ₽');
-        $button.closest('tr').fadeOut(300, function() {
-          $(this).remove();
-          if($('tbody tr').length === 0) location.reload();
-        });
-      },
-      error: function(error) {
-        console.error(error);
-      }
-    });
-  });
+$(document).on('click', '.custom-select', function() {
+    const isExpanded = $(this).attr("size") != 1;
+    $(this).attr("size", isExpanded ? 1 : 10);
+    if (!isExpanded) {
+        $(this).focus();
+    } else {
+        $(this).blur();
+    }
+});
 
-  $(document).on('click', '.update-button', function(e) {
-    e.preventDefault();
-    const $button = $(this);
-    const product_id = $button.data('index');
-    const new_qty = $('#select' + product_id).val();
+// Сохранение изменений при выборе нового значения
+$(document).on('change', '.custom-select', function() {
+    const product_id = $(this).attr('id').replace('select', '');
+    const new_qty = $(this).val();
 
     $.ajax({
-      type: 'POST',
-      url: '{% url "cart:update-to-cart" %}',
-      data: {
-        product_id: product_id,
-        product_qty: new_qty,
-        csrfmiddlewaretoken: '{{ csrf_token }}',
-        action: 'post'
-      },
-      success: function(response) {
-        if(response.error) {
-          alert(response.error);
-          location.reload();
-          return;
+        type: 'POST',
+        url: '{% url "cart:update-to-cart" %}',
+        data: {
+            product_id: product_id,
+            product_qty: new_qty,
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            if (response.error) {
+                alert(response.error);
+                location.reload();
+                return;
+            }
+            $('#lblCartCount').text(response.qty);
+            $('#total').text(response.total + ' ₽');
+        },
+        error: function(error) {
+            console.error(error);
         }
-        
-        $('#lblCartCount').text(response.qty);
-        $('#total').text(response.total + ' ₽');
-        
-        // Обновляем только измененные элементы
-        const $row = $button.closest('tr');
-        $row.find('option:selected').prop('selected', false);
-        $row.find('option[value="' + new_qty + '"]').prop('selected', true);
-      },
-      error: function(error) {
-        console.error(error);
-      }
     });
-  });
+});
+
+// Удаление продукта
+$(document).on('click', '.delete-button', function(e) {
+    e.preventDefault();
+    const $button = $(this);
+
+    $.ajax({
+        type: 'POST',
+        url: '{% url "cart:delete-to-cart" %}',
+        data: {
+            product_id: $button.data('index'),
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+        },
+        success: function(response) {
+            $('#lblCartCount').text(response.qty);
+            $('#total').text(response.total + ' ₽');
+            $button.closest('tr').fadeOut(300, function() {
+                $(this).remove();
+                if ($('tbody tr').length === 0) location.reload();
+            });
+        },
+        error: function(error) {
+            console.error(error);
+        }
+    });
+});
 </script>
 
 {% endblock %}

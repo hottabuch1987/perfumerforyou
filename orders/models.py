@@ -96,5 +96,3 @@ class OrderItem(models.Model):
         # Округление стоимости до десятых с округлением вниз
         return floor(self.price * self.quantity * 10) / 10
 
-
-git commit -m 'fi'

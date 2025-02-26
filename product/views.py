@@ -12,7 +12,7 @@ def product_list(request):
     form = SearchForm()
     name_query = request.GET.get('name_query')
     price_query = request.GET.get('price_query')
-    products = Product.objects.filter(is_visible=True)
+    products = Product.objects.filter(is_visible=True, quantity__gt=0)
     
     # Всегда получаем гарантированный экземпляр GlobalSettings
     global_settings = GlobalSettings.get_instance()

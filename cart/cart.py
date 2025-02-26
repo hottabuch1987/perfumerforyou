@@ -34,12 +34,12 @@ class Cart():
             item['total'] = item['price'] * item['qty']
             yield item
 
-    def add(self, product, quantity):
+    def add(self, product, quantity, price):
 
         product_id = str(product.id)
 
         if product_id not in self.cart:
-            self.cart[product_id] = {'qty': quantity, 'price': str(product.price)}
+            self.cart[product_id] = {'qty': quantity, 'price': str(price)}
         
         self.cart[product_id]['qty'] = quantity
 
@@ -52,9 +52,14 @@ class Cart():
             del self.cart[product_id]
             self.session.modified = True
 
+
+
     def update(self, product, quantity):
-        product_id = str(product)
+        product_id = str(product.id)
         if product_id in self.cart:
+            available_qty = product.quantity
+            if quantity > available_qty:
+                quantity = available_qty
             self.cart[product_id]['qty'] = quantity
             self.session.modified = True
 

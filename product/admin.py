@@ -11,7 +11,7 @@ class ProductAdmin(admin.ModelAdmin):
     
     fieldsets = (
         (None, {
-            'fields': ('supplier', 'name',  'price', 'article', 'is_visible'),
+            'fields': ('supplier', 'name',  'quantity', 'price', 'article', 'is_visible'),
         }),
     )
 
@@ -20,7 +20,7 @@ class ProductAdmin(admin.ModelAdmin):
         
     supplier_name.short_description = 'Название поставщика'  
 
-    list_display = ('supplier_name', 'name',  'price', 'article', 'is_visible')
+    list_display = ('supplier_name', 'name',  'quantity',  'price', 'article', 'is_visible')
 
 
 

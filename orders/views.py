@@ -6,6 +6,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from .models import Order, OrderItem
 from cart.cart import Cart
 from django.http import Http404
+from django.db.models import F
 
 
 def order_list(request):
@@ -47,16 +48,32 @@ def order_create(request):
                     address_pvz=address_pvz, 
                     delivery=delivery
                 )
-                order.save()
                 
+                # Создаем элементы заказа и обновляем количество товаров
                 for item in cart:
+                    product = item['product']
+                    quantity = item['qty']
+                    
+                    # Проверка доступного количества
+                    if product.quantity < quantity:
+                        raise ValueError(
+                            f"Недостаточно товара '{product.name}'. "
+                            f"Доступно: {product.quantity}, Заказано: {quantity}"
+                        )
+                    
+                    # Создаем запись в заказе
                     OrderItem.objects.create(
                         order=order,
-                        product=item['product'],
+                        product=product,
                         price=item['price'],
-                        quantity=item['qty']
+                        quantity=quantity
                     )
-
+                    
+                    # Уменьшаем количество товара на складе
+                    product.quantity = F('quantity') - quantity
+                    product.save(update_fields=['quantity'])
+                
+                # Очищаем корзину только после успешного оформления
                 cart.clear()
                 
                 messages.success(request, f"Заказ №{order.order_number} успешно оформлен!")
@@ -68,6 +85,7 @@ def order_create(request):
     
     # GET запрос - показать страницу подтверждения
     return render(request, 'orders/create_order.html', {'cart': cart})
+
 
 
 def order_detail(request, order_id):

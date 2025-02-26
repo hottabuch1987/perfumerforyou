@@ -1,115 +1,138 @@
-{% extends "base.html" %} 
-{% load static %} 
-{% load mathfilters %} 
+{% extends "base.html" %}
+{% load static %}
+{% load mathfilters %}
 {% block content %}
 
-
-  <div class="container  mt-4">
-    {% if cart|length == 0 %}
-      <h2 class="text-secondary">Корзина пуста.</h2>
-      <hr />
-    {% else %}
+<div class="container mt-4">
+  {% if cart|length == 0 %}
+    <h2 class="text-secondary">Корзина пуста.</h2>
+    <hr />
+  {% else %}
   <div class="card border-info">
     <div class="card-header bg-info text-white">
-      <h3 class="mb-0"><i class="fas fa-shopping-cart"></i>  Корзина</h3>
-  </div>
-  <div class="card-body">
-    <div class="table-responsive">
-      <table class="table table-bordered text-secondary">
-        <thead>
-          <tr>
-            <th>Продукт</th>
-            <th>Цена</th>
-            <th>Количество</th>
-            <th>Действия</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for item in cart %}
-          {% with product=item.product %}
-          <tr>
-            <td>{{ product.name }}</td>
-            <td>{{ product.price|mul:item.qty|floatformat:2 }}</td>
-            <td>
-              <select id="select{{ product.id }}" class="custom-select">
-                <option value="1" {% if item.qty == 1 %} selected {% endif %}>1</option>
-                <option value="2" {% if item.qty == 2 %} selected {% endif %}>2</option>
-                <option value="3" {% if item.qty == 3 %} selected {% endif %}>3</option>
-                <option value="4" {% if item.qty == 4 %} selected {% endif %}>4</option>
-            </select>
-            </td>
-            <td>
-              <button type="button" data-index="{{ product.id }}" class="btn btn-primary btn-sm update-button" title="Обновить">
+      <h3 class="mb-0"><i class="fas fa-shopping-cart"></i> Корзина</h3>
+    </div>
+    <div class="card-body">
+      <div class="table-responsive">
+        <table class="table table-bordered text-secondary">
+          <thead>
+            <tr>
+              <th>Продукт</th>
+              <th>В наличии</th>
+              <th>Количество</th>
+              <th>Действия</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in cart %}
+            {% with product=item.product %}
+            <tr>
+              <td>{{ product.name }}</td>
+              <td>{{ product.quantity }}</td>
+              <td>
+                <select id="select{{ product.id }}" class="custom-select">
+                  {% with max_qty=product.quantity|add:0 %}
+                  {% for i in "1234"|make_list %}
+                    {% with qty=i|add:"0" %}
+                    {% if qty <= max_qty and qty >= 1 %}
+                      <option value="{{ qty }}" {% if item.qty == qty %}selected{% endif %}>
+                        {{ qty }}
+                      </option>
+                    {% endif %}
+                    {% endwith %}
+                  {% endfor %}
+                  {% endwith %}
+                </select>
+              </td>
+              <td>
+                <button type="button" data-index="{{ product.id }}" 
+                        class="btn btn-primary btn-sm update-button" 
+                        title="Обновить"
+                        {% if product.quantity < 1 %}disabled{% endif %}>
                   <i class="fa fa-edit" aria-hidden="true"></i>
-              </button>
-              <button type="button" class="btn btn-danger btn-sm delete-button" data-index="{{ product.id }}" title="Удалить">
+                </button>
+                <button type="button" class="btn btn-danger btn-sm delete-button" 
+                        data-index="{{ product.id }}" title="Удалить">
                   <i class="fa fa-trash" aria-hidden="true"></i>
-              </button>
-            </td>
-          
-          </tr>
-          {% endwith %}
-          {% endfor %}
-        </tbody>
-      </table>
+                </button>
+              </td>
+            </tr>
+            {% endwith %}
+            {% endfor %}
+          </tbody>
+        </table>
 
-      <div class="text-end">
-        <h6 class="text-secondary">Итого: <span id="total" class="font-weight-bold">{{ cart.get_total_price|floatformat:2 }} ₽</span></h6>
-        <a href="{% url 'orders:create_order' %}" class="btn btn-info btn-md mt-4">Оформить заказ</a>   
+        <div class="text-end">
+          <h6 class="text-secondary">Итого: 
+            <span id="total" class="font-weight-bold">{{ cart.get_total_price|floatformat:2 }} ₽</span>
+          </h6>
+          <a href="{% url 'orders:create_order' %}" class="btn btn-info btn-md mt-4">Оформить заказ</a>   
+        </div>
       </div>
     </div>
   </div>
-    {% endif %}
-  </div>
+  {% endif %}
 </div>
-
 
 <script>
   $(document).on('click', '.delete-button', function(e) {
     e.preventDefault();
-
+    const $button = $(this);
+    
     $.ajax({
       type: 'POST',
       url: '{% url "cart:delete-to-cart" %}',
       data: {
-        product_id: $(this).data('index'),
+        product_id: $button.data('index'),
         csrfmiddlewaretoken: '{{ csrf_token }}',
         action: 'post'
       },
       success: function(response) {
-        document.getElementById('lblCartCount').textContent = response.qty;
-        document.getElementById('total').textContent = response.total;
-
-        location.reload();
+        $('#lblCartCount').text(response.qty);
+        $('#total').text(response.total + ' ₽');
+        $button.closest('tr').fadeOut(300, function() {
+          $(this).remove();
+          if($('tbody tr').length === 0) location.reload();
+        });
       },
-      error: function(error, status) {
-        console.log(error);
+      error: function(error) {
+        console.error(error);
       }
     });
   });
 
   $(document).on('click', '.update-button', function(e) {
     e.preventDefault();
-
-    var product_id = $(this).data('index');
+    const $button = $(this);
+    const product_id = $button.data('index');
+    const new_qty = $('#select' + product_id).val();
 
     $.ajax({
       type: 'POST',
       url: '{% url "cart:update-to-cart" %}',
       data: {
         product_id: product_id,
-        product_qty: $('#select' + product_id + ' option:selected').val(),
+        product_qty: new_qty,
         csrfmiddlewaretoken: '{{ csrf_token }}',
         action: 'post'
       },
       success: function(response) {
-        document.getElementById('lblCartCount').textContent = response.qty;
-        document.getElementById('total').textContent = response.total;
-
-        location.reload();
+        if(response.error) {
+          alert(response.error);
+          location.reload();
+          return;
+        }
+        
+        $('#lblCartCount').text(response.qty);
+        $('#total').text(response.total + ' ₽');
+        
+        // Обновляем только измененные элементы
+        const $row = $button.closest('tr');
+        $row.find('option:selected').prop('selected', false);
+        $row.find('option[value="' + new_qty + '"]').prop('selected', true);
       },
-      error: function(error, status) {
-        console.log(error);
+      error: function(error) {
+        console.error(error);
       }
     });
   });

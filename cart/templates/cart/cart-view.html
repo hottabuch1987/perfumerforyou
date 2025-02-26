@@ -75,7 +75,7 @@
 
 $(document).on('click', '.custom-select', function() {
     const maxQty = $(this).find('option').length; // Получаем количество опций
-    const size = (maxQty > 10) ? 10 : maxQty; // Устанавливаем размер 10 или менее, если опций меньше
+    const size = (maxQty > 10) ? 5 : maxQty; // Устанавливаем размер 10 или менее, если опций меньше
     const isExpanded = $(this).attr("size") != 1;
 
     $(this).attr("size", isExpanded ? 1 : size); // Устанавливаем размер в зависимости от состояния
@@ -88,9 +88,11 @@ $(document).on('click', '.custom-select', function() {
 
 
 // Сохранение изменений при выборе нового значения
+// Сохранение изменений при выборе нового значения
 $(document).on('change', '.custom-select', function() {
     const product_id = $(this).attr('id').replace('select', '');
     const new_qty = $(this).val();
+    const $select = $(this); // Сохраняем ссылку на текущий селектор
 
     $.ajax({
         type: 'POST',
@@ -109,6 +111,9 @@ $(document).on('change', '.custom-select', function() {
             }
             $('#lblCartCount').text(response.qty);
             $('#total').text(response.total + ' ₽');
+            
+            // Закрываем селектор
+            $select.blur(); // Убираем фокус, чтобы селектор закрылся
         },
         error: function(error) {
             console.error(error);

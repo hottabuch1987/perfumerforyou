@@ -31,19 +31,19 @@
               <td>{{ product.quantity }}</td>
               <td>
                 <select 
-                    id="select{{ product.id }}" 
-                    class="custom-select"
-                    data-default-size="1"
-                    size="1"
+                  id="select{{ product.id }}" 
+                  class="custom-select"
+                  size="1"
+                  data-default-size="1"
                 >
-                      {% with max_qty=product.quantity %}
-                          {% for i in ""|ljust:max_qty %}
-                              <option value="{{ forloop.counter }}" {% if item.qty == forloop.counter %}selected{% endif %}>
-                                  {{ forloop.counter }}
-                              </option>
-                          {% endfor %}
-                      {% endwith %}
-                  </select>
+                  {% with max_qty=product.quantity %}
+                    {% for i in ""|ljust:max_qty %}
+                      <option value="{{ forloop.counter }}" {% if item.qty == forloop.counter %}selected{% endif %}>
+                        {{ forloop.counter }}
+                      </option>
+                    {% endfor %}
+                  {% endwith %}
+                </select>
               </td>
               
               <td>
@@ -71,56 +71,59 @@
 </div>
 
 <script>
-
-
-$(document).on('click', '.custom-select', function() {
-    const maxQty = $(this).find('option').length; // Получаем количество опций
-    const size = (maxQty > 10) ? 5 : maxQty; // Устанавливаем размер 10 или менее, если опций меньше
-    const isExpanded = $(this).attr("size") != 1;
-
-    $(this).attr("size", isExpanded ? 1 : size); // Устанавливаем размер в зависимости от состояния
-    if (!isExpanded) {
-        $(this).focus();
-    } else {
-        $(this).blur();
-    }
+// Обработчик клика по селекту
+$(document).on('mousedown', '.custom-select', function(e) {
+  e.preventDefault();
+  const $select = $(this);
+  const optionsCount = $select.find('option').length;
+  const newSize = Math.min(5, optionsCount);
+  
+  if($select.attr('size') === "1") {
+    $select.attr('size', newSize).addClass('expanded');
+  } else {
+    $select.attr('size', 1).removeClass('expanded');
+  }
 });
 
+// Обработчик клика вне селекта
+$(document).on('click', function(e) {
+  if(!$(e.target).closest('.custom-select').length) {
+    $('.custom-select.expanded').attr('size', 1).removeClass('expanded');
+  }
+});
 
-// Сохранение изменений при выборе нового значения
-// Сохранение изменений при выборе нового значения
+// Обработчик изменения значения
 $(document).on('change', '.custom-select', function() {
-    const product_id = $(this).attr('id').replace('select', '');
-    const new_qty = $(this).val();
-    const $select = $(this); // Сохраняем ссылку на текущий селектор
+  const $select = $(this);
+  const product_id = $select.attr('id').replace('select', '');
+  const new_qty = $select.val();
 
-    $.ajax({
-        type: 'POST',
-        url: '{% url "cart:update-to-cart" %}',
-        data: {
-            product_id: product_id,
-            product_qty: new_qty,
-            csrfmiddlewaretoken: '{{ csrf_token }}',
-            action: 'post'
-        },
-        success: function(response) {
-            if (response.error) {
-                alert(response.error);
-                location.reload();
-                return;
-            }
-            $('#lblCartCount').text(response.qty);
-            $('#total').text(response.total + ' ₽');
-            
-            // Закрываем селектор
-            $select.blur(); // Убираем фокус, чтобы селектор закрылся
-        },
-        error: function(error) {
-            console.error(error);
-        }
-    });
+  $.ajax({
+    type: 'POST',
+    url: '{% url "cart:update-to-cart" %}',
+    data: {
+      product_id: product_id,
+      product_qty: new_qty,
+      csrfmiddlewaretoken: '{{ csrf_token }}',
+      action: 'post'
+    },
+    success: function(response) {
+      if(response.error) {
+        alert(response.error);
+        location.reload();
+        return;
+      }
+      
+      $('#lblCartCount').text(response.qty);
+      $('#total').text(response.total + ' ₽');
+      $select.attr('size', 1).removeClass('expanded'); // Закрываем после выбора
+    },
+    error: function(error) {
+      console.error(error);
+      $select.attr('size', 1).removeClass('expanded'); // Закрываем даже при ошибке
+    }
+  });
 });
-
 // Удаление продукта
 $(document).on('click', '.delete-button', function(e) {
     e.preventDefault();

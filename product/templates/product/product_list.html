@@ -51,9 +51,15 @@
                                 
 
                                 <td>
-                                    <button type="button" class="btn btn-info btn-sm add-button" data-product-id="{{ product.id }}">
-                                        Добавить в <i class="fa fa-shopping-cart" aria-hidden="true"></i>
+                                    <button type="button" 
+                                            class="btn btn-info btn-sm add-button" 
+                                            data-product-id="{{ product.id }}"
+                                            {% if product.quantity < 1 %}disabled{% endif %}>
+                                        Добавить в <i class="fa fa-shopping-cart"></i>
                                     </button>
+                                    {% if product.quantity < 1 %}
+                                    <small class="text-danger d-block">Нет в наличии</small>
+                                    {% endif %}
                                 </td>
                             </tr>
                         {% empty %}
@@ -85,32 +91,54 @@
     </div>
 </div>
 <script>
-    $(document).on('click', '.add-button', function (e) {
-        e.preventDefault();
-        const productId = $(this).data('product-id');
-        const add_button = $(this);
-        
-        $.ajax({
-            type: 'POST',
-            url: '{% url "cart:add-to-cart" %}',
-            data: {
-                product_id: productId,
-                product_qty: 1,  // Фиксированное количество
-                csrfmiddlewaretoken: '{{ csrf_token }}',
-                action: 'post'
-            },
-            success: function (response) {
-                document.getElementById('lblCartCount').textContent = response.qty;
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчик для кнопок добавления
+        document.querySelectorAll('.add-button').forEach(button => {
+            button.addEventListener('click', function(e) {
+                const productId = this.dataset.productId;
+                const url = "{% url 'cart:add_to_cart' 0 %}".replace('0', productId);
                 
-                add_button.prop('disabled', true);
-                add_button.html("Добавлено в <i class='fa fa-shopping-cart' aria-hidden='true'></i>");
-                add_button.removeClass("btn-info").addClass("btn-success");
-            },
-            error: function (error) {
-                console.log(error);
-            }
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin'
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        showToast('Товар добавлен в корзину', 'success');
+                        updateCartCounter(data.total_items);
+                    } else {
+                        showToast(data.error || 'Ошибка добавления', 'danger');
+                    }
+                })
+                .catch(error => {
+                    showToast('Ошибка сети', 'danger');
+                });
+            });
         });
+    
+        // Функция для показа уведомлений
+        function showToast(message, type) {
+            const toast = document.createElement('div');
+            toast.className = `toast alert alert-${type} fixed-top mx-auto mt-3`;
+            toast.innerHTML = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => toast.remove(), 3000);
+        }
+    
+        // Функция обновления счетчика корзины
+        function updateCartCounter(totalItems) {
+            const counter = document.getElementById('cart-counter');
+            if (counter) {
+                counter.textContent = totalItems;
+                counter.classList.remove('d-none');
+            }
+        }
     });
-</script>
-
+    </script>
 {% endblock %}

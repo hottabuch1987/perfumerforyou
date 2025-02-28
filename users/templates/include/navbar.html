@@ -1,17 +1,12 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-info">
     <div class="container-fluid">
         <a class="navbar-brand" href="{% url 'users:profile' %}">{{request.user.username}}</a>
-        <a class="navbar-brand" href="{% url 'cart:cart-view' %}">
-            <i class="fas fa-shopping-cart"></i> 
-                <span id="lblCartCount">
-                    {% with cart_qty=cart|length%}
-                    {% if cart_qty > 0 %}
-                        {{cart_qty}}                
-                    {% endif %}
-                        
-                    {% endwith %}
-                </span>
-        </a>
+       
+            <a class="navbar-brand" href="{% url 'cart:cart_view' %}">
+                <i class="fa fa-shopping-cart"></i>
+                <span id="cart-counter" class="badge bg-info d-none">0</span>
+            </a>
+  
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
         </button>

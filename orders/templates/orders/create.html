@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% load static %}
+{% load mathfilters %}
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Оформление заказа</h2>
+    
+    <form method="post" action="{% url 'orders:create_order' %}">
+        {% csrf_token %}
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <!-- Блок с товарами -->
+                <h5>Состав заказа:</h5>
+                <ul class="list-group mb-3">
+                    {% for item in cart_items %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6>{{ item.product.name }}</h6>
+                            <small class="text-muted">Арт. {{ item.product.article }}</small>
+                        </div>
+                        <span >
+                            {{ item.quantity }} × {{ item.price|floatformat:2 }} ₽
+                        </span>
+                        
+                    </li>
+                    {% endfor %}
+                </ul>
+                <div class="text-end fs-4">
+                    Итого: <strong>{{ total|floatformat:2 }} ₽</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок выбора доставки -->
+     
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">Данные доставки</h5>
+                
+                <div class="mb-3">
+                    <label class="form-label">Способ доставки:</label>
+                    <select name="delivery" class="form-select" required 
+                            id="delivery-method">
+                        <option value="" disabled selected>Выберите способ доставки</option>
+                        {% for value, name in delivery_choices %}
+                            <option value="{{ value }}">{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3" id="pvz-address-block">
+                    <label class="form-label">Адрес пункта выдачи:</label>
+                    <input type="text" name="address_pvz" 
+                        class="form-control" 
+                        maxlength="150"
+                        placeholder="Введите адрес ПВЗ" required>
+                    <small class="form-text text-muted">
+                        Укажите полный адрес пункта выдачи заказа
+                    </small>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">
+                Подтвердить заказ
+            </button>
+            <a href="{% url 'cart:cart_view' %}" class="btn btn-outline-secondary">
+                Вернуться в корзину
+            </a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

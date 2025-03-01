@@ -4,7 +4,7 @@
 {% block content %}
 
 
-<div class="container mt-4">
+<div class="container mt-4 text-secondary">
     <h2 class="mb-4">🛒 Ваша корзина</h2>
     
     {% if price_changed %}
@@ -16,13 +16,14 @@
 
     {% if cart_items %}
     <div class="card shadow">
-        <div class="card-body ">
+        <div class="card-body">
             <div class="table-responsive">
                 <table class="table">
                     <thead class="table-light">
                         <tr>
-                            <th style="width: 40%">Товар</th>
-                            <th class="text-end">Кол-во</th>
+                            <th style="width: 30%">Товар</th>
+                            <th class="text-end">Артикул</th>
+                            <th class="text-center">Кол-во</th>
                             <th class="text-end">Цена</th>
                             <th class="text-end">Сумма</th>
                             <th class="text-end"></th>
@@ -35,11 +36,15 @@
                         <tr id="cart-item-{{ item.id }}">
                             <td>
                                 <h5 class="mb-1">{{ item.product.name }}</h5>
-                                <small class="text-muted">Арт. {{ item.product.article }}</small>
+                                
                             </td>
                             <td class="text-end align-middle">
+                                {{ item.product.article }}
+                            </td>
+                            
+                            <td class="text-center align-middle">
                                 <input type="number" value="{{ item.quantity }}" min="1" id="quantity-{{ item.id }}" class="form-control form-control-sm"/>
-                                
+                                <small class="text-muted">В наличии: {{ item.product.quantity }}</small> 
                             </td>
 
                             
@@ -50,7 +55,7 @@
                                 {{ item.total_price|floatformat:2 }} ₽
                             </td>
                             <td class="text-end align-middle">
-                                <button class="btn btn-primary btn-sm" onclick="updateCart({{ item.id }})">Расчитать</button>
+                                <button class="btn btn-outline-info btn-sm" onclick="updateCart({{ item.id }})">Расчитать</button>
                             </td>
                             <td class="text-end align-middle">
                                 <button class="btn btn-outline-danger btn-sm" onclick="deleteFromCart({{ item.id }})">Удалить</button>
@@ -77,7 +82,8 @@
                         <a href="{% url 'products:list' %}" class="btn btn-outline-secondary">
                             ← Вернуться к покупкам
                         </a>
-                        <a href="#" class="btn btn-info btn-md mt-4">Оформить заказ</a>
+                        <a href="{% url 'orders:create_order' %}" class="btn btn-info btn-md mt-4">Оформить заказ</a>
+                        
                     </div>
                 </div>
             </div>
@@ -86,8 +92,8 @@
     {% else %}
     <div class="text-center py-5">
         <i class="bi bi-cart-x fs-1 text-muted"></i>
-        <h3 class="mt-3">Ваша корзина пуста</h3>
-        <a href="{% url 'products:list' %}" class="btn btn-primary mt-3">
+        <h3 class="mt-3">Товары в корзине отсутствуют</h3>
+        <a href="{% url 'products:list' %}" class="btn btn-info mt-3">
             Начать покупки
         </a>
     </div>
@@ -112,7 +118,17 @@
     }
     
     function updateCart(cartItemId) {
-        const quantity = $('#quantity-' + cartItemId).val();
+        const quantityInput = $('#quantity-' + cartItemId);
+        const quantity = parseInt(quantityInput.val());
+        const availableQuantity = parseInt(quantityInput.siblings('small').text().match(/\d+/)[0]); // Получаем доступное количество
+
+        // Проверяем, не превышает ли введенное количество доступное
+        if (quantity > availableQuantity) {
+            alert(`Ошибка: Доступно только ${availableQuantity} единиц этого товара.`);
+            quantityInput.val(availableQuantity); // Устанавливаем максимальное допустимое значение
+            return; // Выход
+        }
+        
         $.ajax({
             url: "{% url 'cart:update_cart' 0 %}".replace('0', cartItemId),
             type: 'POST',
@@ -121,9 +137,10 @@
                 'csrfmiddlewaretoken': '{{ csrf_token }}'
             },
             success: function(data) {
-                $('#quantity-' + cartItemId).val(data.quantity);
-                $('#cart-item-' + cartItemId + ' td:nth-child(3)').text(data.display_final_price + ' ₽');
-                $('#cart-item-' + cartItemId + ' td:nth-child(4)').text(data.total_price + ' ₽');
+                quantityInput.val(data.quantity);
+                // Изменим индексы для обновления цен
+                $('#cart-item-' + cartItemId + ' td:nth-child(4)').text(data.display_final_price + ' ₽');  // Цена
+                $('#cart-item-' + cartItemId + ' td:nth-child(5)').text(data.total_price + ' ₽');      // Сумма
                 $('#cart-total').text(data.cart_total + ' ₽');
             },
             error: function(xhr) {
@@ -131,6 +148,8 @@
             }
         });
     }
+
+
     function clearCart() {
         $.ajax({
             url: "{% url 'cart:clear_cart' %}",

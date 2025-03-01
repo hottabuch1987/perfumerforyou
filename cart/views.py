@@ -103,6 +103,7 @@ def update_cart(request, cart_item_id):
 
     return JsonResponse({'status': 'fail'}, status=400)
 
+
 @login_required
 def delete_from_cart(request, cart_item_id):
     if request.method == 'DELETE':
@@ -120,6 +121,8 @@ def delete_from_cart(request, cart_item_id):
             'cart_total': str(cart_total.quantize(Decimal('0.00'))) if cart_total else '0.00'
         })
     return JsonResponse({'status': 'fail'}, status=400)
+
+
 @login_required
 def clear_cart(request):
     if request.method == 'DELETE':

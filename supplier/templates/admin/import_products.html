@@ -1,0 +1,47 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<div class="content">
+    <h1>Импорт товаров для {{ supplier.name }}</h1>
+    
+    <div class="instructions">
+        <h3>Требования к файлу:</h3>
+        <ul>
+            <li>Формат: Excel (.xlsx)</li>
+            <li>Столбцы по порядку:
+                <ol>
+                    <li>Название товара</li>
+                    <li>Цена (число)</li>
+                    <li>Артикул</li>
+                    <li>Количество</li>
+                </ol>
+            </li>
+            <li>Первая строка - заголовки</li>
+        </ul>
+    </div>
+    
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-row">
+            {{ form.excel_file }}
+        </div>
+        <div class="submit-row">
+            <input type="submit" value="Импортировать" class="default">
+            
+        </div>
+    </form>
+</div>
+
+<style>
+.instructions {
+    background: #f8f8f8;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 5px;
+}
+.form-row {
+    margin: 15px 0;
+}
+</style>
+{% endblock %}

@@ -24,6 +24,8 @@ class Cart(models.Model):
     class Meta:
         verbose_name = 'Корзина'
         verbose_name_plural = 'Корзины'
+    def __str__(self):
+        return f'Корзина {self.profile.user.username}'
 
 
 
@@ -60,35 +62,3 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f'{self.product.name} ({self.quantity}) в корзине {self.cart.profile.user.username}'
-
-    # def save(self, *args, **kwargs):
-    #     if not self.price:
-    #         self.price = self.product.price
-    #     super().save(*args, **kwargs)
-
-    # def get_total_price(self):
-    #     return self.price * self.quantity
-
-
-
-
-
-
-
-
-
-
-
-
-        # @property
-    # def total_price(self):
-    #     return self.items.aggregate(
-    #         total=Sum(models.F('price') * models.F('quantity'))
-    #     )['total'] or 0
-
-    # def __str__(self):
-    #     return f'Корзина {self.profile.user.username}'
-
-    # class Meta:
-    #     verbose_name = 'Корзина'
-    #     verbose_name_plural = 'Корзины'

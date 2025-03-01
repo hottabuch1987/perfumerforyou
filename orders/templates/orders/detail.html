@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load static %}
+{% load mathfilters %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2>Детали заказа #{{ order.order_number }}</h2>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h4>Информация о заказе</h4>
+                </div>
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-5">Статус:</dt>
+                        <dd class="col-sm-7">{{ order.get_status_display }}</dd>
+                        
+                        <dt class="col-sm-5">Дата создания:</dt>
+                        <dd class="col-sm-7">{{ order.created|date:"d.m.Y H:i" }}</dd>
+                        
+                        <dt class="col-sm-5">Способ доставки:</dt>
+                        <dd class="col-sm-7">{{ order.get_delivery_display }}</dd>
+                        
+                        <dt class="col-sm-5">Адрес ПВЗ:</dt>
+                        <dd class="col-sm-7">{{ order.address_pvz }}</dd>
+                        
+                        <dt class="col-sm-5">Общая стоимость:</dt>
+                        <dd class="col-sm-7">{{ total_price|floatformat:2 }} руб.</dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Состав заказа</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Товар</th>
+                                    <th>Количество</th>
+                                    <th>Цена</th>
+                                    <th>Сумма</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.quantity }}</td>
+                                    <td>{{ item.price|floatformat:2 }} руб.</td>
+                                    <td>{{ item.get_cost|floatformat:2 }} руб.</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center">Нет товаров в заказе</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
+</div>
+{% endblock %}
+

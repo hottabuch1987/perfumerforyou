@@ -1,4 +1,4 @@
-# markup_utils.py
+# product/utils.py
 from decimal import Decimal
 from django.db.models import F, ExpressionWrapper, DecimalField
 from app_settings.models import GlobalSettings

@@ -14,16 +14,22 @@ class LoginUserForm(AuthenticationForm):
         label='Пароль',
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
     )
+    remember_me = forms.BooleanField(
+        label="Запомнить меня",
+        required=False,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        initial=True  # Можно включить по умолчанию
+    )
 
     def __init__(self, *args, **kwargs):
-        super(LoginUserForm, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         self.helper = FormHelper()
-        self.helper.form_method = 'post'
-        self.helper.add_input(Submit('submit', 'Войти'))  # Кнопка отправки
         self.helper.layout = Layout(
-            Field('username'),  # Поле имени пользователя
-            Field('password'),  # Поле пароля
+            Field('username'),
+            Field('password'),
+            Field('remember_me'),  # Добавить поле в разметку
         )
+        self.helper.add_input(Submit('submit', 'Войти'))
 
 
 class EditPasswordForm(forms.ModelForm):

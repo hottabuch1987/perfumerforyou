@@ -14,19 +14,41 @@ from django.contrib.auth.decorators import login_required
 from django.views.generic import UpdateView
 
 
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.shortcuts import redirect
+
 class LoginUser(LoginView):
     form_class = LoginUserForm
     template_name = 'users/login.html'
+    success_url = reverse_lazy('users:profile')
+    redirect_authenticated_user = True  # Автоматический редирект для авторизованных
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context['form'] = self.get_form(self.get_form_class())
-        return context
+    def form_valid(self, form):
+        remember_me = form.cleaned_data.get('remember_me', False)
+        
+        # Настройка времени жизни сессии и куки
+        if remember_me:
+            self.request.session.set_expiry(1209600)  # 2 недели
+            self.request.session.modified = True  # Принудительное обновление
+        else:
+            self.request.session.set_expiry(0)  # Сессия до закрытия браузера
+            self.request.session.modified = True
+            
+        return super().form_valid(form)
+
+    # Дополнительная проверка для GET-запросов
+    def get(self, request, *args, **kwargs):
+        if self.request.user.is_authenticated:
+            return redirect(self.get_success_url())
+        return super().get(request, *args, **kwargs)
+    
 
 
 def logout_user(request):
-    messages.success(request, f"Вы вышли из системы {request.user.profile}!")
-    logout(request)
+    # Сброс сессии
+    request.session.flush()
+    messages.success(request, "Вы успешно вышли из системы!")
     return redirect('users:login')
 
 

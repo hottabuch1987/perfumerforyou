@@ -78,15 +78,17 @@
                     </div>
                     
                     <div class="d-grid gap-2 mt-4">
-                        <button class="btn btn-outline-danger" onclick="clearCart()">Очистить корзину</button>
-                        <a href="{% url 'products:list' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'products:list' %}" class="btn btn-outline-secondary mb-2">
                             ← Вернуться к покупкам
                         </a>
-                        <a href="{% url 'orders:create_order' %}" class="btn btn-info btn-md mt-4">Оформить заказ</a>
-                        
+                        <button class="btn btn-outline-danger mb-2" onclick="clearCart()">Очистить корзину</button>
+                        <a href="{% url 'orders:create_order' %}" class="btn btn-info btn-md">
+                            Оформить заказ
+                        </a>
                     </div>
                 </div>
             </div>
+            
         </div>
     </div>
     {% else %}

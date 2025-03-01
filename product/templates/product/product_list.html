@@ -3,6 +3,7 @@
 {% block content %}
 
 <div class="container mt-4">
+    
     {% if products %}
     <div class="card border-info">
         <div class="card-header bg-info text-white">
@@ -71,7 +72,7 @@
                 </table>
             
         {% else %}
-                <h2 class="text-secondary">Продукты не найдены.</h2>
+                <h2 class="text-secondary">Товары не найдены.</h2>
                 <form method="get" action="{% url 'products:list' %}" class="mb-3">
                     <div class="row g-3">
                         <div class="col-sm-12 col-md-4">

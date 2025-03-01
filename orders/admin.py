@@ -4,8 +4,7 @@ from .models import Order, OrderItem
 class OrderItemInline(admin.TabularInline):  # Или admin.StackedInline для другого вида
     model = OrderItem
     extra = 1  # Количество дополнительных полей для добавления
-    fields = ('product', 'quantity', 'price')  # Поля, которые будут отображаться
-    # readonly_fields = ('get_cost',)  # Поле с вычисленной стоимостью только для чтения
+    fields = ('product', 'quantity', 'price', 'total_price')  # Поля, которые будут отображаться
 
     def get_cost(self, obj):
         return obj.get_cost()

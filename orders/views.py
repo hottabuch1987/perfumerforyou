@@ -112,3 +112,5 @@ def order_detail(request, order_id):
     }
     
     return render(request, 'orders/detail.html', context)
+
+

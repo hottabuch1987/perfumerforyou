@@ -1,0 +1,14 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="{% url 'admin:export_all_pending' %}" 
+           class="button"
+           style="background: #75a8c1; color: rgb(244, 235, 235); padding: 8px 12px; border-radius: 4px; margin-left: 10px; transition: background 0.3s, color 0.3s; text-decoration: none;"
+           onmouseover="this.style.background='#5f8fa1'; this.style.color='#ffffff'; this.style.textDecoration='underline';"
+           onmouseout="this.style.background='#75a8c1'; this.style.color='rgb(244, 235, 235)'; this.style.textDecoration='none';">
+            📥 Экспорт всех ожидающих
+        </a>
+    </li>
+{% endblock %}

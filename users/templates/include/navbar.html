@@ -1,12 +1,20 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-info">
     <div class="container-fluid">
         
-        <a class="navbar-brand" href="{% url 'users:profile' %}">{{request.user.username}} </a>
+        <a class="navbar-brand" href="{% url 'users:profile' %}"><i class="fas fa-user-circle me-2"></i>{{request.user.username}} </a>
        
             <a class="navbar-brand" href="{% url 'cart:cart_view' %}">
                 <i class="fa fa-shopping-cart"></i>
                 <span id="cart-counter" class="badge bg-info d-none">0</span>
             </a>
+            
+            <div class="currency-toggle">
+                <input class="currency-switch" 
+                       type="checkbox" 
+                       id="currencySwitch" 
+                       onchange="toggleCurrency(this)">
+                <label class="currency-label" for="currencySwitch">Валюта</label>
+            </div>
 
             
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
@@ -16,7 +24,8 @@
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
                 {% if global_settings %}
-                    <span class="nav-link text-white small-font">Курс на {{global_settings.current_date|date:"d.m.Y"}}  <i class="fas fa-dollar-sign">1</i> = {{global_settings.dollar_exchange_rate}} ₽</span>
+                
+                    <span class="nav-link text-white small-font"><i class="fas fa-chart-line me-2"></i> Курс на {{global_settings.current_date|date:"d.m.Y"}} - <i class="fas fa-dollar-sign">1</i> = {{global_settings.dollar_exchange_rate}} ₽</span>
                 {% endif %}
                 </li>
                
@@ -34,3 +43,104 @@
         </div>
     </div>
 </nav>
+
+
+<script>
+    function toggleCurrency(switchElement) {
+        if (switchElement.checked) {
+            // Код для смены на доллары
+            // Например, обновите курс и отображение валюты
+            console.log('Доллары');
+        } else {
+            // Код для смены на рубли
+            console.log('Рубли');
+        }
+    }
+</script>
+<style>
+    /* Кастомные стили для переключателя */
+    .currency-toggle {
+        position: relative;
+        display: flex;
+        align-items: center;
+        margin-left: 1rem;
+    }
+    
+    .currency-switch {
+        --width: 70px;
+        --height: 34px;
+        --thumb-size: 28px;
+        --transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+        
+        -webkit-appearance: none;
+        -moz-appearance: none;
+        appearance: none;
+        width: var(--width);
+        height: var(--height);
+        background: rgba(255,255,255,0.2);
+        border-radius: 50px;
+        position: relative;
+        cursor: pointer;
+        transition: var(--transition);
+        border: 2px solid rgba(255,255,255,0.3);
+    }
+    
+    .currency-switch::before {
+        content: '';
+        position: absolute;
+        width: var(--thumb-size);
+        height: var(--thumb-size);
+        border-radius: 50%;
+        background: white;
+        top: 50%;
+        left: 3px;
+        transform: translateY(-50%);
+        transition: var(--transition);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: Arial;
+        font-weight: bold;
+        font-size: 14px;
+        color: #2196F3;
+        content: '₽';
+    }
+    
+    .currency-switch:checked {
+        background: rgba(255,255,255,0.3);
+        border-color: rgba(255,255,255,0.5);
+    }
+    
+    .currency-switch:checked::before {
+        left: calc(var(--width) - var(--thumb-size) - 3px);
+        content: '$';
+        color: #4CAF50;
+        transform: translateY(-50%) rotate(360deg);
+    }
+    
+    .currency-label {
+        margin-left: 10px;
+        color: white;
+        font-weight: 500;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+        white-space: nowrap;
+    }
+    
+    /* Анимация иконки корзины */
+    .fa-shopping-cart {
+        transition: transform 0.3s ease;
+    }
+    
+    .fa-shopping-cart:hover {
+        transform: scale(1.1) rotate(-10deg);
+    }
+    
+    /* Стили для бейджа корзины */
+    #cart-counter {
+        position: relative;
+        top: -8px;
+        right: -5px;
+        transition: all 0.3s ease;
+    }
+    </style>

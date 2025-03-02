@@ -47,6 +47,6 @@ def product_list(request):
         'products': products,
         'name_query': name_query,
         'price_query': price_query,
-        # 'global': GlobalSettings.get_instance(),
+        'global': GlobalSettings.get_instance(),
     })
 

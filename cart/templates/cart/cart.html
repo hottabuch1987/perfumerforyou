@@ -7,12 +7,7 @@
 <div class="container mt-4 text-secondary">
     <h2 class="mb-4">🛒 Ваша корзина</h2>
     
-    {% if price_changed %}
-    <div class="alert alert-warning alert-dismissible fade show">
-        ⚠️ Цены на некоторые товары изменились! Пожалуйста, обновите вашу корзину.
-        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-    {% endif %}
+    
 
     {% if cart_items %}
     <div class="card shadow">
@@ -48,20 +43,15 @@
                             </td>
         
                             <td class="text-end align-middle">
-                                {% if item.current_price == item.price %}
-                                {{ item.price|floatformat:2 }} ₽
-                                {% else %}
+                                
                                 {{ item.current_price|floatformat:2 }} ₽
-                                {% endif %}
+                                
                             </td>           
                             <td class="text-end align-middle">
                                 <!-- Сумма по цене добавления -->
-                                {% if item.current_price == item.price %}
-                                {{ item.price|mul:item.quantity|floatformat:2 }} ₽
-                                {% else %}
+
                                 {{ item.current_price|mul:item.quantity|floatformat:2 }} ₽
-                                {% endif %}
-                            
+                                
                             </td>
                             
                             <td class="text-end align-middle">

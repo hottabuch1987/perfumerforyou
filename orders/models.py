@@ -82,7 +82,7 @@ class OrderItem(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, unique=True)
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='items', verbose_name='Заказ')
     product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='order_items', verbose_name='Товар')
-    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Стоимость для клиента')
+    price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Цена закупки')
     quantity = models.SmallIntegerField(default=1, verbose_name='Количество')
     total_price = models.DecimalField(max_digits=12, decimal_places=2, verbose_name='Итоговая стоимость заказа')
 

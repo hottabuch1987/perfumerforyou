@@ -48,7 +48,10 @@ class CartItem(models.Model):
     price = models.DecimalField(
         max_digits=12,
         decimal_places=2,
+        blank=True,
+        null=True,
         verbose_name='Цена на момент добавления'
+        
     )
     added_at = models.DateTimeField(
         auto_now_add=True,

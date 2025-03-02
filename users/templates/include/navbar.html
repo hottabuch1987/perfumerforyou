@@ -1,12 +1,14 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-info">
     <div class="container-fluid">
-        <a class="navbar-brand" href="{% url 'users:profile' %}">{{request.user.username}}</a>
+        <a class="navbar-brand" href="{% url 'users:profile' %}">{{request.user.username}} </a>
        
             <a class="navbar-brand" href="{% url 'cart:cart_view' %}">
                 <i class="fa fa-shopping-cart"></i>
                 <span id="cart-counter" class="badge bg-info d-none">0</span>
             </a>
-  
+            {% if global %}
+            <span class="navbar-brand">Курс <i class="fas fa-dollar-sign"></i> {{global.dollar_exchange_rate}}</span>
+            {% endif %}
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
         </button>

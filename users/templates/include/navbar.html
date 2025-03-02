@@ -7,15 +7,18 @@
                 <i class="fa fa-shopping-cart"></i>
                 <span id="cart-counter" class="badge bg-info d-none">0</span>
             </a>
-            {% if global_settings %}
-                <span class="navbar-brand">Курс <i class="fas fa-dollar-sign"></i> {{global_settings.dollar_exchange_rate}}</span>
-            {% endif %}
+
             
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="mynavbar">
             <ul class="navbar-nav me-auto">
+                <li class="nav-item">
+                {% if global_settings %}
+                    <span class="nav-link text-white small-font">Курс на {{global_settings.current_date|date:"d.m.Y"}}  <i class="fas fa-dollar-sign">1</i> = {{global_settings.dollar_exchange_rate}} ₽</span>
+                {% endif %}
+                </li>
                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'products:list' %}"><i class="fas fa-box"></i> Товары</a>

@@ -1,6 +1,5 @@
 from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext_lazy as _
 
 class GlobalSettings(models.Model):
@@ -19,6 +18,10 @@ class GlobalSettings(models.Model):
         verbose_name='Курс доллара',
         validators=[MinValueValidator(0)]
     )
+    current_date = models.DateTimeField(
+        auto_now=True,
+        verbose_name='Текущая дата'
+    )
 
     def __str__(self):
         return "Глобальные настройки"
@@ -31,20 +34,14 @@ class GlobalSettings(models.Model):
     def get_instance(cls):
         obj, created = cls.objects.get_or_create(pk=1)
         return obj
-    
+
     def save(self, *args, **kwargs):
-        """
-        Переопределяем метод save, чтобы предотвратить создание
-        нескольких экземпляров этой модели и вернуть сообщение.
-        """
         if self.pk is not None:
-            # Если объект уже существует, просто обновляем его
             super().save(*args, **kwargs)
         else:
-            # Проверяем, существует ли уже экземпляр
             if GlobalSettings.objects.exists():
-                # Возвращаем сообщение вместо исключения
                 return _("Можно создать только один экземпляр GlobalSettings.")
             super().save(*args, **kwargs)
+
 
 

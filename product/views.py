@@ -24,6 +24,8 @@ def product_list(request):
     # Фильтрация
     if name_query:
         products = products.filter(name__icontains=name_query)
+        
+
 
     if price_query:
         try:

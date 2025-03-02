@@ -9,13 +9,28 @@ from product.models import Product
 import openpyxl
 from decimal import Decimal
 
+
+
+class ProductInline(admin.TabularInline):
+    model = Product
+    extra = 1  # Количество пустых форм для добавления новых элементов
+
+
+
 class ImportProductsForm(forms.Form):
     excel_file = forms.FileField(label="Excel файл с товарами")
 
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
     list_display = ('name', 'email', 'import_products_link')
-    
+    inlines = [ProductInline]
+    search_fields = ('name', 'email')
+
+    fieldsets = (
+        (None, {
+            'fields': ('name', 'email'),
+        }),
+    )
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [

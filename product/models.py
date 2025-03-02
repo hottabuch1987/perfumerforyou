@@ -10,7 +10,7 @@ class Product(models.Model):
     name = models.CharField("Название товара", max_length=100)
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
     article = models.CharField("Aртикул", max_length=100)
-    is_visible = models.BooleanField("Видимость товаров поставщика", default=True)
+    is_visible = models.BooleanField("Видимость", default=True)
     quantity = models.PositiveIntegerField("Количество товара", default=0)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     
@@ -19,6 +19,7 @@ class Product(models.Model):
     class Meta:
         verbose_name = 'Товар'
         verbose_name_plural = 'Товары'
+        ordering = ['-updated_at']
         indexes = [
             models.Index(fields=['name'], name='name_idx'),  # Индекс по полю name
             models.Index(fields=['article'], name='article_idx'),  # Индекс по полю article

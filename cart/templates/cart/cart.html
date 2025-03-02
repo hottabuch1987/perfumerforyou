@@ -46,14 +46,24 @@
                                 <input type="number" value="{{ item.quantity }}" min="1" id="quantity-{{ item.id }}" class="form-control form-control-sm"/>
                                 <small class="text-muted">В наличии: {{ item.product.quantity }}</small> 
                             </td>
-
+        
+                            <td class="text-end align-middle">
+                                {% if item.current_price == item.price %}
+                                {{ item.price|floatformat:2 }} ₽
+                                {% else %}
+                                {{ item.current_price|floatformat:2 }} ₽
+                                {% endif %}
+                            </td>           
+                            <td class="text-end align-middle">
+                                <!-- Сумма по цене добавления -->
+                                {% if item.current_price == item.price %}
+                                {{ item.price|mul:item.quantity|floatformat:2 }} ₽
+                                {% else %}
+                                {{ item.current_price|mul:item.quantity|floatformat:2 }} ₽
+                                {% endif %}
                             
-                            <td class="text-end align-middle">
-                                {{ item.display_final_price|floatformat:2 }} ₽
                             </td>
-                            <td class="text-end align-middle">
-                                {{ item.total_price|floatformat:2 }} ₽
-                            </td>
+                            
                             <td class="text-end align-middle">
                                 <button class="btn btn-outline-info btn-sm" onclick="updateCart({{ item.id }})">Расчитать</button>
                             </td>

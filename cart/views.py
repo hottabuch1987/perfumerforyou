@@ -16,22 +16,24 @@ def cart_view(request):
     cart, created = Cart.objects.get_or_create(profile=user_profile)
     cart_items = cart.items.select_related('product').all()
     
-    # Аннотируем цены продуктов
-    annotated_cart_items = annotate_product_prices(cart_items, user_profile)
-
-    # Суммируем итоговую стоимость
-    for item in annotated_cart_items:
-        item.total_price = item.display_final_price * item.quantity  # Здесь добавляем вычисление суммы
-
-    total = sum(item.total_price for item in annotated_cart_items)  # Итоговая сумма
-
+    # Получаем актуальные цены
+    products = Product.objects.filter(
+        id__in=cart_items.values_list('product_id', flat=True)
+    )
+    annotated_products = annotate_product_prices(products, user_profile)
+    price_map = {p.id: p.display_final_price for p in annotated_products}
+    
+    # Обновляем текущие цены и считаем сумму по актуальным ценам
+    total = Decimal('0.00')
+    for item in cart_items:
+        item.current_price = price_map.get(item.product_id, item.product.price)
+        total += item.current_price * item.quantity  # Используем ТЕКУЩИЕ цены
+    
     return render(request, 'cart/cart.html', {
-        'cart_items': annotated_cart_items,
+        'cart_items': cart_items,
         'total': total,
         'global': GlobalSettings.get_instance(),
     })
-
-
 
 
 @login_required
@@ -121,7 +123,6 @@ def delete_from_cart(request, cart_item_id):
             'cart_total': str(cart_total.quantize(Decimal('0.00'))) if cart_total else '0.00'
         })
     return JsonResponse({'status': 'fail'}, status=400)
-
 
 @login_required
 def clear_cart(request):

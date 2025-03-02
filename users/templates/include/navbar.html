@@ -8,18 +8,13 @@
                 <span id="cart-counter" class="badge bg-info d-none">0</span>
             </a>
             
-            <div class="currency-toggle">
-                <input class="currency-switch" 
-                       type="checkbox" 
-                       id="currencySwitch" 
-                       onchange="toggleCurrency(this)">
-                <label class="currency-label" for="currencySwitch">Валюта</label>
-            </div>
+
 
             
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
             <span class="navbar-toggler-icon"></span>
         </button>
+        
         <div class="collapse navbar-collapse" id="mynavbar">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
@@ -40,6 +35,13 @@
                     <a class="nav-link" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
                 </li>
             </ul>        
+        </div>
+        <div class="currency-toggle">
+            <input class="currency-switch" 
+                   type="checkbox" 
+                   id="currencySwitch" 
+                   onchange="toggleCurrency(this)">
+            <label class="currency-label" for="currencySwitch"></label>
         </div>
     </div>
 </nav>

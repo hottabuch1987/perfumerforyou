@@ -92,9 +92,9 @@ def order_create(request):
                 OrderItem.objects.bulk_create(order_items)
 
                 # Обновление остатков и очистка корзины
-                for item in cart_items:
-                    item.product.quantity -= item.quantity
-                    item.product.save(update_fields=['quantity'])
+                # for item in cart_items:
+                #     item.product.quantity -= item.quantity
+                #     item.product.save(update_fields=['quantity'])
                 cart.items.all().delete()
 
                 messages.success(request, f"Заказ #{order.order_number} успешно создан!")

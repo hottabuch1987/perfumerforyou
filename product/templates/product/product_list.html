@@ -32,7 +32,7 @@
                         <tr>
                             <th>Название</th>
                             <th>Цена</th>
-                            <th>В наличии</th>
+                            
                             <th>Артикул</th>
                             <th>Время обновления</th>
                             <th>Действия</th>
@@ -46,7 +46,7 @@
                                 {{ product.display_final_price|floatformat:2 }} 
                                 {% if request.GET.currency == 'USD' %}USD{% else %}₽{% endif %}
                                 </td>
-                                <td>{{ product.quantity }}</td>
+                               
                                 <td>{{ product.article}}</td>
                                 <td>{{ product.updated_at }}</td>
                           

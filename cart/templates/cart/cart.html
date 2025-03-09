@@ -19,7 +19,6 @@
                             <th class="text-end">Цена</th>
                             <th class="text-end">Сумма</th>
                             <th class="text-end"></th>
-                            <th class="text-end"></th>
                         </tr>
                     </thead>
                     <tbody>
@@ -29,14 +28,24 @@
                                 <h5 class="mb-1 ">{{ item.product.name }}</h5>
                             </td>
                             <td class="text-end align-middle">
-                                {{ item.product.article|floatformat:2 }}
+                                {{ item.product.article }}
                             </td>
                             
                             <td class="text-center align-middle">
-                                <input type="number" value="{{ item.quantity }}" min="1" id="quantity-{{ item.id }}" class="form-control form-control-sm"/>
-                                <small class="text-muted">В наличии: {{ item.product.quantity }}</small> 
+                                <div class="d-flex align-items-center justify-content-center">
+                                    <button class="btn btn-outline-danger btn-sm" 
+                                            onclick="changeQuantity({{ item.id }}, -1)">-</button>
+                                    <span id="quantity-{{ item.id }}" 
+                                          class="form-control text-center bg-light mx-2" 
+                                          style="max-width: 50px;">
+                                        {{ item.quantity }}
+                                    </span>
+                                    <button class="btn btn-outline-success btn-sm" 
+                                            onclick="changeQuantity({{ item.id }}, 1)">+</button>
+                                </div>
                             </td>
-        
+                            
+                
                             <td class="text-end align-middle">
                                 {{ item.current_price|floatformat:2 }} 
                                 {% if currency == 'USD' %}${% else %}₽{% endif %}
@@ -47,10 +56,9 @@
                             </td>
                             
                             <td class="text-end align-middle">
-                                <button class="btn btn-outline-info btn-sm" onclick="updateCart({{ item.id }})">Обновить</button>
-                            </td>
-                            <td class="text-end align-middle">
-                                <button class="btn btn-outline-danger btn-sm" onclick="deleteFromCart({{ item.id }})">Удалить</button>
+                                <button class="btn btn-outline-danger btn-sm" onclick="deleteFromCart({{ item.id }})">удалить
+                                    <i class="bi bi-trash"></i>
+                                </button>
                             </td>
                         </tr>
                         {% endfor %}
@@ -97,46 +105,53 @@
         return '{% if currency == "USD" %}${% else %}₽{% endif %}';
     }
 
-    // Обновленный код функций
-function deleteFromCart(cartItemId) {
-    const currencyParam = '?currency={{ currency }}';
-    
-    $.ajax({
-        url: "{% url 'cart:delete_from_cart' 0 %}".replace('0', cartItemId) + currencyParam,
-        type: 'DELETE',
-        headers: {'X-CSRFToken': '{{ csrf_token }}'},
-        success: function(data) {
-            if(data.status === 'success') {
-                $('#cart-item-' + cartItemId).fadeOut();
-                $('#cart-total').text(data.cart_total + ' ' + data.currency_symbol);
-            } else {
-                alert(data.error || 'Ошибка при удалении товара');
+    function changeQuantity(cartItemId, delta) {
+        const input = $('#quantity-' + cartItemId);
+        let value = parseInt(input.val()) + delta;
+        if (value < 1) value = 1;
+        input.val(value);
+        updateCart(cartItemId);
+    }
+
+    function deleteFromCart(cartItemId) {
+        const currencyParam = '?currency={{ currency }}';
+        
+        $.ajax({
+            url: "{% url 'cart:delete_from_cart' 0 %}".replace('0', cartItemId) + currencyParam,
+            type: 'DELETE',
+            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+            success: function(data) {
+                if(data.status === 'success') {
+                    $('#cart-item-' + cartItemId).fadeOut();
+                    $('#cart-total').text(data.cart_total + ' ' + data.currency_symbol);
+                } else {
+                    alert(data.error || 'Ошибка при удалении товара');
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'Ошибка при удалении товара';
+                if(xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                alert(errorMessage);
             }
-        },
-        error: function(xhr) {
-            let errorMessage = 'Ошибка при удалении товара';
-            if(xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            }
-            alert(errorMessage);
-        }
-    });
+        });
+    }
+
+    function changeQuantity(cartItemId, delta) {
+    const quantityElement = $('#quantity-' + cartItemId);
+    const oldValue = parseInt(quantityElement.text());
+    let newValue = oldValue + delta;
+    if (newValue < 1) newValue = 1;
+    quantityElement.text(newValue);
+    updateCart(cartItemId, oldValue);
 }
 
-function updateCart(cartItemId) {
+function updateCart(cartItemId, oldValue) {
     const baseUrl = "{% url 'cart:update_cart' 0 %}".replace('0', cartItemId);
     const currency = '{{ currency }}';
     const url = `${baseUrl}?currency=${currency}`;
-    
-    const quantityInput = $('#quantity-' + cartItemId);
-    const quantity = parseInt(quantityInput.val());
-    const availableQuantity = parseInt(quantityInput.siblings('small').text().match(/\d+/)[0]);
-
-    if (quantity > availableQuantity) {
-        alert(`Ошибка: Доступно только ${availableQuantity} единиц этого товара.`);
-        quantityInput.val(availableQuantity);
-        return;
-    }
+    const quantity = $('#quantity-' + cartItemId).text().trim();
     
     $.ajax({
         url: url,
@@ -145,7 +160,6 @@ function updateCart(cartItemId) {
             quantity: quantity,
             'csrfmiddlewaretoken': '{{ csrf_token }}'
         },
-        // При обновлении данных
         success: function(data) {
             const symbol = data.currency === 'USD' ? '$' : '₽';
             const price = parseFloat(data.price).toFixed(2);
@@ -155,6 +169,11 @@ function updateCart(cartItemId) {
             $('#cart-item-' + cartItemId + ' td:nth-child(4)').text(price + ' ' + symbol);
             $('#cart-item-' + cartItemId + ' td:nth-child(5)').text(total_price + ' ' + symbol);
             $('#cart-total').text(cart_total + ' ' + symbol);
+
+            // Обновляем количество, если сервер вернул новое значение
+            if (data.quantity !== undefined) {
+                $('#quantity-' + cartItemId).text(data.quantity);
+            }
         },
         error: function(xhr) {
             let errorMessage = 'Ошибка обновления корзины';
@@ -164,10 +183,11 @@ function updateCart(cartItemId) {
                 errorMessage += ': ' + xhr.statusText;
             }
             alert(errorMessage);
+            // Восстановление предыдущего значения при ошибке
+            $('#quantity-' + cartItemId).text(oldValue);
         }
     });
 }
-
     function clearCart() {
         $.ajax({
             url: "{% url 'cart:clear_cart' %}?currency={{ currency }}",

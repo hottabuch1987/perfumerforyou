@@ -126,8 +126,6 @@ def update_cart(request, cart_item_id):
             user_profile = request.user.profile
             cart_item = CartItem.objects.get(id=cart_item_id, cart__profile=user_profile)
             
-            # ... остальная логика ...
-                    # Обновляем количество
             cart_item.quantity = new_quantity
             cart_item.save()
 

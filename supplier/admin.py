@@ -1,3 +1,4 @@
+# admin.py
 from django.contrib import admin
 from django.urls import path, reverse
 from django.shortcuts import render, redirect
@@ -7,18 +8,54 @@ from django.utils.html import format_html
 from .models import Supplier
 from product.models import Product
 import openpyxl
+import xlrd
 from decimal import Decimal
-
-
-
-class ProductInline(admin.TabularInline):
-    model = Product
-    extra = 1  # Количество пустых форм для добавления новых элементов
-
-
+from tempfile import NamedTemporaryFile
+import os
+from openpyxl.utils.exceptions import InvalidFileException
+# admin.py
+from django import forms
+from .utils import excel_column_to_index
 
 class ImportProductsForm(forms.Form):
-    excel_file = forms.FileField(label="Excel файл с товарами")
+    excel_file = forms.FileField(
+        label="Excel файл с товарами",
+        help_text="Поддерживаемые форматы: .xls и .xlsx"
+    )
+    article_col = forms.CharField(
+        label="Колонка с артикулом (например: C)",
+        initial="C",
+        max_length=3
+    )
+    name_col = forms.CharField(
+        label="Колонка с названием (например: A)",
+        initial="A",
+        max_length=3
+    )
+    price_col = forms.CharField(
+        label="Колонка с ценой (например: B)",
+        initial="B",
+        max_length=3
+    )
+ 
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # Конвертируем буквенные обозначения в индексы
+        columns = ['article_col', 'name_col', 'price_col',]
+        for col in columns:
+            try:
+                cleaned_data[f'{col}_index'] = excel_column_to_index(cleaned_data.get(col, ''))
+            except ValueError:
+                self.add_error(col, "Некорректное обозначение колонки")
+        return cleaned_data
+    
+class ProductInline(admin.TabularInline):
+    model = Product
+    extra = 1
+
+
+
 
 @admin.register(Supplier)
 class SupplierAdmin(admin.ModelAdmin):
@@ -26,11 +63,6 @@ class SupplierAdmin(admin.ModelAdmin):
     inlines = [ProductInline]
     search_fields = ('name', 'email')
 
-    fieldsets = (
-        (None, {
-            'fields': ('name', 'email'),
-        }),
-    )
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [
@@ -41,82 +73,120 @@ class SupplierAdmin(admin.ModelAdmin):
             ),
         ]
         return custom_urls + urls
-    
+
+
     def import_products_link(self, obj):
         return format_html(
             '<a href="{}" class="button">📥 Импорт товаров</a>',
             reverse('admin:import_products', args=[obj.pk])
         )
     import_products_link.short_description = "Импорт"
-    
+
+
     def import_products_view(self, request, object_id):
         supplier = Supplier.objects.get(pk=object_id)
-        
-        if request.method == 'POST':
-            form = ImportProductsForm(request.POST, request.FILES)
-            if form.is_valid():
-                try:
-                    wb = openpyxl.load_workbook(
-                        form.cleaned_data['excel_file'],
-                        data_only=True
-                    )
+        form = ImportProductsForm(request.POST or None, request.FILES or None)
+
+        if request.method == 'POST' and form.is_valid():
+            tmp_file = None
+            try:
+                # Получаем индексы колонок
+                article_col = form.cleaned_data['article_col_index']
+                name_col = form.cleaned_data['name_col_index']
+                price_col = form.cleaned_data['price_col_index']
+
+                excel_file = form.cleaned_data['excel_file']
+                file_extension = os.path.splitext(excel_file.name)[1].lower()
+
+                # Обработка файла
+                with NamedTemporaryFile(delete=False, suffix=file_extension) as tmp:
+                    for chunk in excel_file.chunks():
+                        tmp.write(chunk)
+                    tmp_file = tmp.name
+
+                rows = []
+                if file_extension == '.xlsx':
+                    wb = openpyxl.load_workbook(tmp_file, data_only=True, read_only=True)
                     ws = wb.active
-                    
-                    created = updated = 0
-                    errors = []
-                    
-                    for row in ws.iter_rows(min_row=2):
-                        try:
-                            data = {
-                                'name': row[0].value,
-                                'price': Decimal(str(row[1].value)),
-                                'article': row[2].value,
-                                'quantity': int(row[3].value),
-                                'supplier': supplier,
-                                'is_visible': True
-                            }
-                            
-                            obj, created_flag = Product.objects.update_or_create(
-                                supplier=supplier,
-                                article=data['article'],
-                                defaults=data
-                            )
-                            
-                            if created_flag:
-                                created += 1
-                            else:
-                                updated += 1
-                                
-                        except Exception as e:
-                            errors.append(f"Строка {row[0].row}: {str(e)}")
-                    
-                    msg = f"Импорт завершен. Создано: {created}, Обновлено: {updated}"
-                    if errors:
-                        msg += f" | Ошибки: {', '.join(errors)}"
-                        messages.warning(request, msg)
-                    else:
-                        messages.success(request, msg)
-                        
-                    # Исправленный редирект
-                    return redirect(reverse(
-                        'admin:%s_%s_changelist' % (
-                            Product._meta.app_label,
-                            Product._meta.model_name
+                    rows = ws.iter_rows(min_row=2)
+                elif file_extension == '.xls':
+                    wb = xlrd.open_workbook(tmp_file)
+                    ws = wb.sheet_by_index(0)
+                    rows = [ws.row(rowx) for rowx in range(1, ws.nrows)]
+
+                created = updated = 0
+                errors = []
+
+                for row_idx, row in enumerate(rows, start=2):
+                    try:
+                        # Обработка строки
+                        if file_extension == '.xlsx':
+                            cells = row
+                            get_val = lambda cell: cell.value
+                        else:
+                            cells = row
+                            get_val = lambda cell: cell.value
+
+                        # Проверка наличия всех колонок
+                        max_col = max(article_col, name_col, price_col)
+                        if max_col >= len(cells):
+                            raise IndexError(f"Недостаточно колонок в строке {row_idx}")
+
+                        # Извлечение значений с обработкой None
+                        article = str(get_val(cells[article_col])) if cells[article_col].value else None
+                        name = str(get_val(cells[name_col])) if cells[name_col].value else None
+                        price = str(get_val(cells[price_col])) if cells[price_col].value else None
+
+                        # Валидация обязательных полей
+                        if not all([article, name, price]):
+                            raise ValueError("Заполните все обязательные поля")
+
+                        # Преобразование данных
+                        data = {
+                            'name': name.strip(),
+                            'price': Decimal(price.replace(',', '.')),
+                            'article': article.strip(),
+                            'supplier': supplier,
+                            'is_visible': True,
+                            'quantity': 0  # Добавляем значение по умолчанию
+                        }
+
+                        # Создание/обновление записи
+                        _, created_flag = Product.objects.update_or_create(
+                            supplier=supplier,
+                            article=data['article'],
+                            defaults=data
                         )
-                    ))
-                
-                except Exception as e:
-                    messages.error(request, f"Ошибка обработки файла: {str(e)}")
-                    return redirect('.')
-        
-        form = ImportProductsForm()
-        
+
+                        if created_flag:
+                            created += 1
+                        else:
+                            updated += 1
+
+                    except Exception as e:
+                        errors.append(f"Строка {row_idx}: {str(e)}")
+
+                # Формирование отчета
+                msg = f"Успешно обработано: {created + updated} записей. Создано: {created}, Обновлено: {updated}"
+                if errors:
+                    msg += f" | Ошибки: {len(errors)}"
+                    messages.warning(request, f"{msg} | Первые 5 ошибок: {', '.join(errors[:5])}")
+                else:
+                    messages.success(request, msg)
+
+                return redirect(reverse('admin:%s_%s_changelist' % (Product._meta.app_label, Product._meta.model_name)))
+
+            except Exception as e:
+                messages.error(request, f"Ошибка обработки файла: {str(e)}")
+            finally:
+                if tmp_file and os.path.exists(tmp_file):
+                    os.unlink(tmp_file)
+
         context = self.admin_site.each_context(request)
         context.update({
             'form': form,
             'supplier': supplier,
             'opts': self.model._meta,
-            'Product': Product,  # Передаем модель в контекст
             'title': 'Импорт товаров'
         })
         return render(request, 'admin/import_products.html', context)

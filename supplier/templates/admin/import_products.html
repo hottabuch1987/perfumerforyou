@@ -1,47 +1,76 @@
 {% extends "admin/base_site.html" %}
-{% load i18n %}
+{% load static %}
+
+{% block extrahead %}
+    <link rel="stylesheet" href="{% static 'admin/css/forms.css' %}">
+    <style>
+        .form-row { margin: 20px 0; }
+        .form-group { margin-bottom: 15px; }
+        .helptext { color: #666; font-size: 0.9em; }
+        .errorlist { color: #dc3545; }
+    </style>
+{% endblock %}
 
 {% block content %}
 <div class="content">
     <h1>Импорт товаров для {{ supplier.name }}</h1>
     
-    <div class="instructions">
-        <h3>Требования к файлу:</h3>
-        <ul>
-            <li>Формат: Excel (.xlsx)</li>
-            <li>Столбцы по порядку:
-                <ol>
-                    <li>Название товара</li>
-                    <li>Цена (число)</li>
-                    <li>Артикул</li>
-                    <li>Количество</li>
-                </ol>
-            </li>
-            <li>Первая строка - заголовки</li>
-        </ul>
-    </div>
+    {% if messages %}
+    <ul class="messagelist">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">
+            {{ message|safe }}
+        </li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
+        
         <div class="form-row">
+            {{ form.excel_file.errors }}
+            {{ form.excel_file.label_tag }}
             {{ form.excel_file }}
+            <p class="helptext">{{ form.excel_file.help_text }}</p>
         </div>
+
+            <!-- templates/admin/import_products.html -->
+    <div class="form-row">
+        <h3>Настройка колонок:</h3>
+        <div class="form-group">
+            {{ form.article_col.errors }}
+            <label for="{{ form.article_col.id_for_label }}">
+                {{ form.article_col.label }}<br>
+                <small>Пример: A → первая колонка, B → вторая и т.д.</small>
+            </label>
+            {{ form.article_col }}
+        </div>
+        <div class="form-group">
+            {{ form.name_col.errors }}
+            <label for="{{ form.name_col.id_for_label }}">
+                {{ form.name_col.label }}<br>
+                <small>Пример: H5 → вводите H</small>
+            </label>
+            {{ form.name_col }}
+        </div>
+        <div class="form-group">
+            {{ form.price_col.errors }}
+            <label for="{{ form.price_col.id_for_label }}">
+                {{ form.price_col.label }}<br>
+                <small>Пример: P9 → вводите P</small>
+            </label>
+            {{ form.price_col }}
+        </div>
+        
+    </div>
+
         <div class="submit-row">
             <input type="submit" value="Импортировать" class="default">
-            
+            <a href="{% url 'admin:product_product_changelist' %}" class="button">
+                Отмена
+            </a>
         </div>
     </form>
 </div>
-
-<style>
-.instructions {
-    background: #f8f8f8;
-    padding: 20px;
-    margin: 20px 0;
-    border-radius: 5px;
-}
-.form-row {
-    margin: 15px 0;
-}
-</style>
 {% endblock %}

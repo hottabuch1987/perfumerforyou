@@ -20,7 +20,7 @@ def product_list(request):
     price_query = request.GET.get('price_query')
 
     # Получаем все доступные товары
-    products = Product.objects.filter(is_visible=True, quantity__gt=0)
+    products = Product.objects.filter(is_visible=True)
 
     # Профиль пользователя
     user_profile = request.user.profile

@@ -35,11 +35,14 @@
                                 <div class="d-flex align-items-center justify-content-center">
                                     <button class="btn btn-outline-danger btn-sm" 
                                             onclick="changeQuantity({{ item.id }}, -1)">-</button>
-                                    <span id="quantity-{{ item.id }}" 
-                                          class="form-control text-center bg-light mx-2" 
-                                          style="max-width: 50px;">
-                                        {{ item.quantity }}
-                                    </span>
+                                    <input type="number" 
+                                           id="quantity-{{ item.id }}" 
+                                           class="form-control text-center mx-2" 
+                                           style="max-width: 80px;"
+                                           value="{{ item.quantity }}"
+                                           min="1"
+                                           step="1"
+                                           onchange="updateCart({{ item.id }})">
                                     <button class="btn btn-outline-success btn-sm" 
                                             onclick="changeQuantity({{ item.id }}, 1)">+</button>
                                 </div>
@@ -101,16 +104,56 @@
 </div>
 
 <script>
-    function getCurrencySymbol() {
-        return '{% if currency == "USD" %}${% else %}₽{% endif %}';
+    function changeQuantity(cartItemId, delta) {
+            const input = document.getElementById('quantity-' + cartItemId);
+            let value = parseInt(input.value) + delta;
+            if (value < 1) value = 1;
+            input.value = value;
+            updateCart(cartItemId);
+        }
+
+    function updateCart(cartItemId) {
+        const baseUrl = "{% url 'cart:update_cart' 0 %}".replace('0', cartItemId);
+        const currency = '{{ currency }}';
+        const url = `${baseUrl}?currency=${currency}`;
+        const input = document.getElementById('quantity-' + cartItemId);
+        const quantity = input.value;
+        const oldValue = input.value;
+
+        $.ajax({
+            url: url,
+            type: 'POST',
+            data: {
+                quantity: quantity,
+                'csrfmiddlewaretoken': '{{ csrf_token }}'
+            },
+            success: function(data) {
+                const symbol = data.currency === 'USD' ? '$' : '₽';
+                document.querySelector(`#cart-item-${cartItemId} td:nth-child(4)`).textContent = 
+                    parseFloat(data.price).toFixed(2) + ' ' + symbol;
+                document.querySelector(`#cart-item-${cartItemId} td:nth-child(5)`).textContent = 
+                    parseFloat(data.total_price).toFixed(2) + ' ' + symbol;
+                document.getElementById('cart-total').textContent = 
+                    parseFloat(data.cart_total).toFixed(2) + ' ' + symbol;
+
+                // Обновление значения на случай, если сервер изменил количество
+                input.value = data.quantity;
+            },
+            error: function(xhr) {
+                let errorMessage = 'Ошибка обновления корзины';
+                if(xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                alert(errorMessage);
+                input.value = oldValue; // Восстановление предыдущего значения
+            }
+        });
     }
 
-    function changeQuantity(cartItemId, delta) {
-        const input = $('#quantity-' + cartItemId);
-        let value = parseInt(input.val()) + delta;
-        if (value < 1) value = 1;
-        input.val(value);
-        updateCart(cartItemId);
+
+
+    function getCurrencySymbol() {
+        return '{% if currency == "USD" %}${% else %}₽{% endif %}';
     }
 
     function deleteFromCart(cartItemId) {
@@ -138,56 +181,6 @@
         });
     }
 
-function changeQuantity(cartItemId, delta) {
-    const quantityElement = $('#quantity-' + cartItemId);
-    const oldValue = parseInt(quantityElement.text());
-    let newValue = oldValue + delta;
-    if (newValue < 1) newValue = 1;
-    quantityElement.text(newValue);
-    updateCart(cartItemId, oldValue);
-}
-
-function updateCart(cartItemId, oldValue) {
-    const baseUrl = "{% url 'cart:update_cart' 0 %}".replace('0', cartItemId);
-    const currency = '{{ currency }}';
-    const url = `${baseUrl}?currency=${currency}`;
-    const quantity = $('#quantity-' + cartItemId).text().trim();
-    
-    $.ajax({
-        url: url,
-        type: 'POST',
-        data: {
-            quantity: quantity,
-            'csrfmiddlewaretoken': '{{ csrf_token }}'
-        },
-        success: function(data) {
-            const symbol = data.currency === 'USD' ? '$' : '₽';
-            const price = parseFloat(data.price).toFixed(2);
-            const total_price = parseFloat(data.total_price).toFixed(2);
-            const cart_total = parseFloat(data.cart_total).toFixed(2);
-            
-            $('#cart-item-' + cartItemId + ' td:nth-child(4)').text(price + ' ' + symbol);
-            $('#cart-item-' + cartItemId + ' td:nth-child(5)').text(total_price + ' ' + symbol);
-            $('#cart-total').text(cart_total + ' ' + symbol);
-
-            // Обновляем количество, если сервер вернул новое значение
-            if (data.quantity !== undefined) {
-                $('#quantity-' + cartItemId).text(data.quantity);
-            }
-        },
-        error: function(xhr) {
-            let errorMessage = 'Ошибка обновления корзины';
-            if(xhr.responseJSON && xhr.responseJSON.error) {
-                errorMessage = xhr.responseJSON.error;
-            } else if(xhr.statusText) {
-                errorMessage += ': ' + xhr.statusText;
-            }
-            alert(errorMessage);
-            // Восстановление предыдущего значения при ошибке
-            $('#quantity-' + cartItemId).text(oldValue);
-        }
-    });
-}
     function clearCart() {
         $.ajax({
             url: "{% url 'cart:clear_cart' %}?currency={{ currency }}",

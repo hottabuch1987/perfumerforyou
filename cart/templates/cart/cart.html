@@ -4,55 +4,6 @@
 {% block content %}
 
 
-<style>
-    /* Стили для мобильных устройств */
-    @media (max-width: 768px) {
-        .table thead {
-            display: none;
-        }
-        
-        .table tr {
-            display: block;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid #dee2e6;
-        }
-        
-        .table td {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%!important;
-            border: none;
-            padding: 0.5rem;
-        }
-        
-        .table td::before {
-            content: attr(data-label);
-            font-weight: bold;
-            width: 40%;
-            padding-right: 1rem;
-        }
-        
-        .table td.text-end,
-        .table td.text-center {
-            text-align: left!important;
-        }
-        
-        .cart-actions {
-            flex-direction: column;
-            gap: 0.5rem;
-        }
-        
-        .quantity-control {
-            width: 100%;
-            justify-content: space-between;
-        }
-        
-        .quantity-control input {
-            max-width: 80px!important;
-        }
-    }
-</style>
 
 <div class="container mt-4 text-secondary">
     <h2 class="mb-4">🛒 Ваша корзина</h2>
@@ -153,6 +104,59 @@
     {% endif %}
 </div>
 
+<style>
+    /* Стили для мобильных устройств */
+    @media (max-width: 768px) {
+        .table thead {
+            display: none;
+        }
+        
+        .table tr {
+            display: block;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .table td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%!important;
+            border: none;
+            padding: 0.5rem;
+        }
+        
+        .table td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            width: 40%;
+            padding-right: 1rem;
+        }
+        
+        .table td.text-end,
+        .table td.text-center {
+            text-align: left!important;
+        }
+        
+        .cart-actions {
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .quantity-control {
+            width: 100%;
+            justify-content: space-between;
+        }
+        
+        .quantity-control input {
+            max-width: 80px!important;
+        }
+    }
+</style>
+
+{% endblock %}
+
+{% block extra_scripts %}
 
 <script>
     function changeQuantity(cartItemId, delta) {

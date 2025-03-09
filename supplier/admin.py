@@ -182,7 +182,7 @@ class SupplierAdmin(admin.ModelAdmin):
                             'article': article.strip(),
                             'supplier': supplier,
                             'is_visible': True,
-                            'quantity': 100  # Добавляем значение по умолчанию
+                            'quantity': 999  # Добавляем значение по умолчанию
                         }
 
                         # Создание/обновление записи

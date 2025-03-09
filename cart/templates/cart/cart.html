@@ -138,7 +138,7 @@
         });
     }
 
-    function changeQuantity(cartItemId, delta) {
+function changeQuantity(cartItemId, delta) {
     const quantityElement = $('#quantity-' + cartItemId);
     const oldValue = parseInt(quantityElement.text());
     let newValue = oldValue + delta;

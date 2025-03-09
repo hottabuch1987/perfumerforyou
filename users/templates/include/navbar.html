@@ -31,9 +31,16 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:edit' %}"><i class="fas fa-lock"></i> Изменить пароль</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'users:logout' %}"><i class="fas fa-sign-out-alt"></i> Выйти</a>
                 </li>
+
+                {% if request.user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'admin:index' %}"><i class="fas fa-cogs"></i> Админ-панель</a>
+                </li>
+                {% endif %}
             </ul>        
         </div>
        

@@ -9,14 +9,18 @@ from .models import Supplier
 from product.models import Product
 import openpyxl
 import xlrd
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from tempfile import NamedTemporaryFile
 import os
 from openpyxl.utils.exceptions import InvalidFileException
 # admin.py
 from django import forms
 from .utils import excel_column_to_index
+from app_settings.models import GlobalSettings
 
+#если выбрана валюта доллар долже пересчитать по курсу
+
+# admin.py
 class ImportProductsForm(forms.Form):
     excel_file = forms.FileField(
         label="Excel файл с товарами",
@@ -37,19 +41,33 @@ class ImportProductsForm(forms.Form):
         initial="B",
         max_length=3
     )
- 
+    currency = forms.ChoiceField(
+        label="Валюта в файле",
+        choices=(('RUB', 'Рубль'), ('USD', 'Доллар США')),
+        initial='RUB',
+        widget=forms.RadioSelect
+    )
 
     def clean(self):
         cleaned_data = super().clean()
-        # Конвертируем буквенные обозначения в индексы
-        columns = ['article_col', 'name_col', 'price_col',]
+        # Конвертация колонок
+        columns = ['article_col', 'name_col', 'price_col']
         for col in columns:
             try:
                 cleaned_data[f'{col}_index'] = excel_column_to_index(cleaned_data.get(col, ''))
             except ValueError:
                 self.add_error(col, "Некорректное обозначение колонки")
+        
+        # Проверка наличия курса доллара
+        currency = cleaned_data.get('currency')
+        if currency == 'USD':
+            global_settings = GlobalSettings.get_instance()
+            if not global_settings.dollar_exchange_rate:
+                self.add_error('currency', "Курс доллара не установлен в глобальных настройках")
+        
         return cleaned_data
-    
+
+
 class ProductInline(admin.TabularInline):
     model = Product
     extra = 1
@@ -91,6 +109,9 @@ class SupplierAdmin(admin.ModelAdmin):
             tmp_file = None
             try:
                 # Получаем индексы колонок
+                currency = form.cleaned_data['currency']
+                global_settings = GlobalSettings.get_instance()
+                usd_rate = global_settings.dollar_exchange_rate
                 article_col = form.cleaned_data['article_col_index']
                 name_col = form.cleaned_data['name_col_index']
                 price_col = form.cleaned_data['price_col_index']
@@ -131,20 +152,33 @@ class SupplierAdmin(admin.ModelAdmin):
                         max_col = max(article_col, name_col, price_col)
                         if max_col >= len(cells):
                             raise IndexError(f"Недостаточно колонок в строке {row_idx}")
+                        
+                        
+
 
                         # Извлечение значений с обработкой None
                         article = str(get_val(cells[article_col])) if cells[article_col].value else None
                         name = str(get_val(cells[name_col])) if cells[name_col].value else None
                         price = str(get_val(cells[price_col])) if cells[price_col].value else None
+                        
 
                         # Валидация обязательных полей
                         if not all([article, name, price]):
                             raise ValueError("Заполните все обязательные поля")
+                        
+                        try:
+                            price_value = Decimal(str(price).replace(',', '.'))
+                        except InvalidOperation as e:
+                            raise ValueError(f"Некорректная цена: {str(e)}")
+
+                        # Конвертация валюты
+                        if currency == 'USD':
+                            price_value = price_value * usd_rate  # Теперь price_value определена
 
                         # Преобразование данных
                         data = {
                             'name': name.strip(),
-                            'price': Decimal(price.replace(',', '.')),
+                            'price': price_value,
                             'article': article.strip(),
                             'supplier': supplier,
                             'is_visible': True,

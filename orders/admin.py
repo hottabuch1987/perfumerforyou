@@ -1,8 +1,10 @@
+from django.contrib import messages
 from django.contrib import admin
 from django.http import HttpResponse
 from openpyxl import Workbook
 from .models import Order, OrderItem
 from django.urls import path
+from django.shortcuts import redirect
 
 
 class OrderItemInline(admin.TabularInline):
@@ -23,11 +25,16 @@ class OrderAdmin(admin.ModelAdmin):
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.exclude(status='Собран')
+        return qs.exclude(status='completed')
 
     # Новый метод для экспорта
+
+    
     def export_pending_orders(self, request, queryset):
-        queryset = queryset.filter(status='Ожидает подтверждения')
+        queryset = Order.objects.filter(status='pending')
+        if not queryset.exists():
+            self.message_user(request, "Нет заказов для экспорта", level=messages.WARNING)
+            return redirect('admin:orders_order_changelist')
         
         wb = Workbook()
         ws = wb.active
@@ -46,13 +53,15 @@ class OrderAdmin(admin.ModelAdmin):
         
         # Данные
         for order in queryset:
+            total = sum(item.total_price for item in order.items.all())
             ws.append([
                 order.order_number,
                 str(order.user),
                 order.get_status_display(),
                 order.address_pvz,
                 order.get_delivery_display(),
-                order.get_total_price()
+                total
+               
             ])
         
         # Формирование ответа
@@ -74,9 +83,10 @@ class OrderAdmin(admin.ModelAdmin):
         return custom_urls + urls
 
     def export_all_pending(self, request):
+        print("export_all_pending", request)
         return self.export_pending_orders(
             request, 
-            Order.objects.filter(status='Ожидает подтверждения')
+            Order.objects.filter(status='pending')
         )
-
+    
 admin.site.register(Order, OrderAdmin)

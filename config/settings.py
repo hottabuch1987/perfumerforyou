@@ -155,7 +155,7 @@ MEDIA_ROOT = BASE_DIR / 'media'
 SESSION_COOKIE_AGE = 1209600  # 2 недели (для случая "Запомнить меня")
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # Закрытие сессии при закрытии браузера
 SESSION_SAVE_EVERY_REQUEST = True  # Обновление времени жизни сессии
-
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'
 # Редирект после входа
 LOGIN_REDIRECT_URL = 'users:profile'
 LOGIN_URL = 'users:login'

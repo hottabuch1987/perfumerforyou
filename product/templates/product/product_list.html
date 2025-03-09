@@ -42,10 +42,14 @@
                         {% for product in products %}
                             <tr>
                                 <td>{{ product.name }}</td>
-                                <td>{{ product.display_final_price|floatformat:2 }} ₽</td>
+                                <td>
+                                {{ product.display_final_price|floatformat:2 }} 
+                                {% if request.GET.currency == 'USD' %}USD{% else %}₽{% endif %}
+                                </td>
                                 <td>{{ product.quantity }}</td>
                                 <td>{{ product.article}}</td>
                                 <td>{{ product.updated_at }}</td>
+                          
                                 
 
                                 <td>

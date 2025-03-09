@@ -1,37 +1,13 @@
 # cart/views.py
 from django.contrib import messages
-from django.http import JsonResponse
-from django.db import IntegrityError
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db import transaction
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from orders.models import Order, OrderItem
 from cart.models import Cart
-
-
-# orders/views.py
-from django.views.decorators.http import require_POST
-from django.db import transaction
-
-# orders/views.py
-# cart/views.py
-from django.contrib import messages
-from django.http import JsonResponse
-from django.db import IntegrityError
-from django.shortcuts import get_object_or_404, render, redirect
-from django.db import transaction
 from decimal import Decimal
-from django.contrib.auth.decorators import login_required
-from orders.models import Order, OrderItem
-from cart.models import Cart
 from product.utils import annotate_product_prices
 from product.models import Product
-
-
-# orders/views.py
-from django.views.decorators.http import require_POST
-from django.db import transaction
 
 # orders/views.py
 @login_required

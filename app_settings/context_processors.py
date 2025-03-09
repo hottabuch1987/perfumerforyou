@@ -5,3 +5,8 @@ def global_settings(request):
     return {
         'global_settings': settings
     }
+# settings/context_processors.py
+def currency_context(request):
+    return {
+        'current_currency': request.GET.get('currency', 'RUB')
+    }

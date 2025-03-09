@@ -1,5 +1,5 @@
 from django.contrib import messages
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from decimal import Decimal, InvalidOperation
 from .models import Product
 from .forms import SearchForm
@@ -7,8 +7,14 @@ from django.contrib.auth.decorators import login_required
 from .utils import annotate_product_prices  # Импортируем функцию
 from app_settings.models import GlobalSettings
 
+
+
 @login_required
 def product_list(request):
+    currency = request.GET.get('currency', 'RUB').upper()
+    if currency not in ['RUB', 'USD']:
+        currency = 'RUB'
+
     form = SearchForm()
     name_query = request.GET.get('name_query')
     price_query = request.GET.get('price_query')
@@ -40,7 +46,7 @@ def product_list(request):
         products = Product.objects.filter(is_visible=True, quantity__gt=0)
 
     # Аннотация
-    products = annotate_product_prices(products, user_profile)
+    products = annotate_product_prices(products, user_profile, currency)
 
     return render(request, 'product/product_list.html', {
         'form': form,
@@ -48,5 +54,5 @@ def product_list(request):
         'name_query': name_query,
         'price_query': price_query,
         'global': GlobalSettings.get_instance(),
+      
     })
-

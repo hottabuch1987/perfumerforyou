@@ -11,7 +11,7 @@ class Product(models.Model):
     price = models.DecimalField("Цена", max_digits=12, decimal_places=2)
     article = models.CharField("Aртикул", max_length=100)
     is_visible = models.BooleanField("Видимость", default=True)
-    quantity = models.PositiveIntegerField("Количество товара", default=0)
+    quantity = models.PositiveIntegerField("Количество товара", default=1)
     updated_at = models.DateTimeField("Дата обновления", auto_now=True)
     
     def __str__(self):

@@ -8,15 +8,21 @@
 
 <div class="d-flex justify-content-center align-items-center vh-100">
     <div class="container bg-white shadow-md p-4 form-layout" style="max-width: 400px; border: 1px solid rgba(108, 117, 125, 0.5);">
+   
+        <!-- Логотип -->
+        <div class="text-center mb-3">
+            <img src="{% static 'img/logo.jpg' %}" alt="Логотип" class="img-fluid" style="max-width: 30%; height: auto; opacity: 0.6; border-radius: 15px;">
+        </div>
         <h3 class="text-center text-secondary">Вход в панель</h3>
         <br>
-
+        
+        <!-- /Users/hottabuch/PycharmProjects/parfumeria/config/static/img/logo.jpg -->
         <form method="post">
             {% csrf_token %}
             {{ form|crispy }}
 
             <div class="text-center text-secondary">
-                <button type="submit" class="btn btn-info m-2 btn-register">Вход</button>
+                <button type="submit" class="btn btn-outline-info m-2 btn-register">Вход</button>
             </div>
         </form>
 

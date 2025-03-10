@@ -1,7 +1,7 @@
 <nav class="navbar navbar-expand-sm navbar-dark bg-info">
     <div class="container-fluid">
         
-        <a class="navbar-brand" href="{% url 'users:profile' %}"><i class="fas fa-user-circle me-2"></i>{{request.user.username}} </a>
+        <a class="navbar-brand" href="{% url 'users:profile' %}"><i class="fas fa-user-circle me-2"></i> {{request.user.username}} </a>
        
             <a class="navbar-brand" href="{% url 'cart:cart_view' %}">
                 <i class="fa fa-shopping-cart"></i>
@@ -123,4 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
         right: -5px;
         transition: all 0.3s ease;
     }
+   /* Основные стили для ссылки */
+   .navbar-brand {
+        transition: transform 0.3s ease, color 0.3s ease; /* Плавный переход */
+    }
+    
+    /* Эффект при наведении */
+    .navbar-brand:hover {
+        transform: scale(1.1); /* Увеличение размера */
+        color: #007bff; /* Изменение цвета текста */
+    }
+
+
 </style>
